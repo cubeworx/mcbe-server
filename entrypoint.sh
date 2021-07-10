@@ -292,7 +292,7 @@ update_server_properties() {
   if [[ "x${LEVEL_TYPE}" != "x" ]]; then
     if [[ "x${LEVEL_TYPE,,}" == "xdefault" ]] || [[ "x${LEVEL_TYPE,,}" == "xflat" ]] || [[ "x${LEVEL_TYPE,,}" == "xlegacy" ]]; then
       sed -i "s/level-type=.*/level-type=${LEVEL_TYPE^^}/" $SERVER_PROPERTIES
-      #level-type missing from later downloads, insert if env var exists
+      #level-type missing from recent downloads, insert if env var exists
       if [[ $(cat $SERVER_PROPERTIES | grep "level-type" | wc -l) -eq 0 ]]; then
         echo "" >> $SERVER_PROPERTIES
         echo "level-type="${LEVEL_TYPE^^} >> $SERVER_PROPERTIES
