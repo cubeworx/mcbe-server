@@ -1,0 +1,24 @@
+version: '3.8'
+volumes:
+  mcbe-data:
+    driver: local
+services:
+  mcbe-server:
+    image: cubeworx/mcbe-server
+    environment:
+      DIFFICULTY: easy
+      EULA: 'TRUE'
+      GAMEMODE: creative
+    volumes:
+    - mcbe-data:/mcbe/data
+    ports:
+    - 19132:19132/udp
+    stop_grace_period: 30s
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "10"

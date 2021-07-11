@@ -3,14 +3,14 @@
 set -e
 
 EULA=$EULA
-CWRX_HOME=${CWRX_HOME:-"/cubeworx"}
-ADDONS_PATH=${ADDONS_PATH:-"/cubeworx/data/addons"}
-DATA_PATH=${DATA_PATH:-"/cubeworx/data"}
-SEEDS_FILE=${SEEDS_FILE:-"/cubeworx/seeds.txt"}
-SERVER_PATH=${SERVER_PATH:-"/cubeworx/server"}
-SERVER_PERMISSIONS=${SERVER_WHITELIST:-"/cubeworx/server/permissions.json"}
-SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/cubeworx/server/server.properties"}
-SERVER_WHITELIST=${SERVER_WHITELIST:-"/cubeworx/server/whitelist.json"}
+MCBE_HOME=${MCBE_HOME:-"/mcbe"}
+ADDONS_PATH=${ADDONS_PATH:-"/mcbe/data/addons"}
+DATA_PATH=${DATA_PATH:-"/mcbe/data"}
+SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
+SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
+SERVER_PERMISSIONS=${SERVER_WHITELIST:-"/mcbe/server/permissions.json"}
+SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
+SERVER_WHITELIST=${SERVER_WHITELIST:-"/mcbe/server/whitelist.json"}
 VERSION=$VERSION
 ZIP_FILE="/bedrock-server-${VERSION}.zip"
 
