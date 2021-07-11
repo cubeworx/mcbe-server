@@ -54,7 +54,7 @@ check_addons() {
     mkdir -p $ADDONS_PATH
   fi
   if [ ! -f "${ADDONS_PATH}/readme.txt" ]; then
-    echo "Place .addons, .mcpack, or .zip files here for them to be added to the server" > $ADDONS_PATH/readme.txt
+    echo "Place .mcaddon, .mcpack, or .zip files here for them to be added to the server" > $ADDONS_PATH/readme.txt
   fi
   for EXT_TYPE in mcaddon mcpack zip ; do
     EXT_CHECK=$(ls -alh $ADDONS_PATH 2> /dev/null | grep ".${EXT_TYPE}" | wc -l)
@@ -103,7 +103,7 @@ move_pack() {
 
 check_pack_type() {
   PACK_TYPE=$1
-  echo "Checking for ${PACK_TYPE}."
+  echo "Checking ${ADDONS_PATH} for ${PACK_TYPE}."
   if [ -d "${ADDONS_PATH}/${PACK_TYPE}" ]; then
     #Get world name
     LEVEL_NAME=$(cat $SERVER_PROPERTIES | grep "^level-name=" | awk -F 'level-name=' '{print $2}')
