@@ -226,7 +226,7 @@ update_server_properties() {
   fi
   #SERVER_PORTV6
   if [[ "x${SERVER_PORTV6}" != "x" ]]; then
-    if [[ "x${SERVER_PORTV6}" -gt 0 ]] && [[ "${SERVER_PORTV6}" -lt 65536 ]]; then
+    if [[ "${SERVER_PORTV6}" -gt 0 ]] && [[ "${SERVER_PORTV6}" -lt 65536 ]]; then
       sed -i "s/server-portv6=.*/server-portv6=${SERVER_PORTV6}/" $SERVER_PROPERTIES
     else
       echo "ERROR: SERVER_PORTV6 must be a number must be a number between 1-65535!"

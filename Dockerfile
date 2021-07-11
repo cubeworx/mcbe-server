@@ -6,9 +6,11 @@ ENV VERSION=$VERSION \
     ZIP_FILE="bedrock-server-${VERSION}.zip" \
     MCBE_HOME="/mcbe" \
     DATA_PATH="/mcbe/data" \
-    SERVER_NAME="CubeWorx" \
+    LEVEL_NAME="Bedrock-Level" \
+    SERVER_NAME="CubeWorx-MCBE" \
     SERVER_PATH="/mcbe/server" \
-    SERVER_PORT=19132
+    SERVER_PORT=19132 \
+    SERVER_PORTV6=19133
 
 RUN apt-get update && \
     apt-get -y install jq libcurl4 unzip zip && \
@@ -24,6 +26,7 @@ ADD entrypoint.sh /
 ADD seeds.txt $MCBE_HOME/
 
 EXPOSE $SERVER_PORT/udp
+EXPOSE $SERVER_PORTV6/udp
 VOLUME $DATA_PATH
 
 ENTRYPOINT ["/entrypoint.sh"]
