@@ -14,6 +14,7 @@ SERVER_PERMISSIONS=${SERVER_WHITELIST:-"/mcbe/server/permissions.json"}
 SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
 SERVER_WHITELIST=${SERVER_WHITELIST:-"/mcbe/server/whitelist.json"}
 VERSION=${VERSION:-"LATEST"}
+VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
 
 check_data_dir() {
   DIR_NAME=$1
@@ -24,11 +25,18 @@ check_data_dir() {
 }
 
 get_latest_version() {
-  LATEST_URL=$(curl -Ss -A "cubeworx/mcbe-server" -H "accept-language:*" https://www.minecraft.net/en-us/download/server/bedrock | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*')
-  LATEST_FILE=$(echo $LATEST_URL  | awk -F '-linux/' '{print $2}')
-  VERSION=$(echo $LATEST_FILE | awk -F 'server-' '{print $2}' | awk -F '.zip' '{print $1}')
-  if [ ! -f "${ARTIFACTS_PATH}/${LATEST_FILE}" ]; then
-    download_file $LATEST_URL $ARTIFACTS_PATH/$LATEST_FILE
+  WEBSITE_DATA=$(curl -Ss -A "cubeworx/mcbe-server" -H "accept-language:*" https://www.minecraft.net/en-us/download/server/bedrock)
+  #Check if website curl worked, if not default to latest from versions.txt
+  if [[ $(echo $WEBSITE_DATA | grep $DOWNLOAD_ENDPOINT | wc -l) -ne 0 ]]; then
+    LATEST_URL=$(echo $WEBSITE_DATA | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*')
+    VERSION=$(echo $LATEST_URL | awk -F '-linux/' '{print $2}' | awk -F 'server-' '{print $2}' | awk -F '.zip' '{print $1}')
+    echo "Latest version available is: ${VERSION}"
+  else
+    echo "ERROR: Unable to determine latest version, defaulting to latest in ${VERSIONS_FILE}"
+    VERSION=$(head -n 1 $VERSIONS_FILE)
+  fi
+  if [ ! -f "${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip" ]; then
+    download_file $DOWNLOAD_ENDPOINT/bedrock-server-$VERSION.zip $ARTIFACTS_PATH/bedrock-server-$VERSION.zip
   fi
 }
 
@@ -54,9 +62,11 @@ compare_version() {
   if [ -f "${DATA_PATH}/version.txt" ]; then
     OLD_VER=$(cat $DATA_PATH/version.txt)
     if [[ "x${OLD_VER}" != "x${VERSION}" ]]; then
+      DATE_TIME=$(date +%Y%m%d%H%M%S)
       echo "Previous version was ${OLD_VER}, current version is ${VERSION}"
       echo "Creating backup of data before version change."
-      zip -r $DATA_PATH/backups/${OLD_VER}_to_${VERSION}.mcworld $DATA_PATH/worlds
+      echo "Backup file: ${DATA_PATH}/backups/${DATE_TIME}_${OLD_VER}_to_${VERSION}.mcworld"
+      zip -r $DATA_PATH/backups/${DATE_TIME}_${OLD_VER}_to_${VERSION}.mcworld $DATA_PATH/worlds
     fi
   fi
 }
@@ -70,7 +80,7 @@ check_symlinks() {
 }
 
 check_addons() {
-  echo "Checking for new .mcaddon, .mcpack, or .zip files in ${ADDONS_PATH}."
+  echo "Checking for .mcaddon, .mcpack, or .zip files in ${ADDONS_PATH}."
   if [ ! -d "${ADDONS_PATH}" ]; then
     mkdir -p $ADDONS_PATH
   fi

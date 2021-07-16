@@ -5,9 +5,9 @@ ENV MCBE_HOME="/mcbe" \
     DATA_PATH="/mcbe/data" \
     LEVEL_NAME="Bedrock-Level" \
     SERVER_NAME="CubeWorx-MCBE" \
-    SERVER_PATH="/mcbe/server" \
     SERVER_PORT=19132 \
     SERVER_PORTV6=19133 \
+    TZ="UTC" \
     VERSION="LATEST"
 
 RUN apt-get update && \
@@ -21,6 +21,7 @@ WORKDIR $MCBE_HOME
 
 ADD entrypoint.sh /
 ADD seeds.txt $MCBE_HOME/
+ADD versions.txt $MCBE_HOME/
 
 EXPOSE $SERVER_PORT/udp
 EXPOSE $SERVER_PORTV6/udp
