@@ -5,14 +5,15 @@ set -e
 EULA=$EULA
 MCBE_HOME=${MCBE_HOME:-"/mcbe"}
 ADDONS_PATH=${ADDONS_PATH:-"/mcbe/data/addons"}
+ARTIFACTS_PATH=${ARTIFACTS_PATH:-"/mcbe/data/artifacts"}
 DATA_PATH=${DATA_PATH:-"/mcbe/data"}
+DOWNLOAD_ENDPOINT=${DOWNLOAD_ENDPOINT:-"https://minecraft.azureedge.net/bin-linux"}
 SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
 SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
 SERVER_PERMISSIONS=${SERVER_WHITELIST:-"/mcbe/server/permissions.json"}
 SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
 SERVER_WHITELIST=${SERVER_WHITELIST:-"/mcbe/server/whitelist.json"}
-VERSION=$VERSION
-ZIP_FILE="/bedrock-server-${VERSION}.zip"
+VERSION=${VERSION:-"LATEST"}
 
 check_data_dir() {
   DIR_NAME=$1
@@ -22,10 +23,29 @@ check_data_dir() {
   fi
 }
 
-extract_source() {
-  echo "Unzipping $ZIP_FILE to $SERVER_PATH"
-  unzip -q $ZIP_FILE -d $SERVER_PATH
-  rm -rf $ZIP_FILE
+get_latest_version() {
+  LATEST_URL=$(curl -Ss -A "cubeworx/mcbe-server" -H "accept-language:*" https://www.minecraft.net/en-us/download/server/bedrock | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*')
+  LATEST_FILE=$(echo $LATEST_URL  | awk -F '-linux/' '{print $2}')
+  VERSION=$(echo $LATEST_FILE | awk -F 'server-' '{print $2}' | awk -F '.zip' '{print $1}')
+  if [ ! -f "${ARTIFACTS_PATH}/${LATEST_FILE}" ]; then
+    download_file $LATEST_URL $ARTIFACTS_PATH/$LATEST_FILE
+  fi
+}
+
+download_file(){
+  DOWNLOAD_URL=$1
+  DOWNLOAD_FILE=$2
+  echo "Downloading ${DOWNLOAD_URL}"
+  curl -Ss $DOWNLOAD_URL -o $DOWNLOAD_FILE
+  if [ ! -f $DOWNLOAD_FILE ]; then
+    echo "ERROR: File failed to download!"
+    exit 1
+  fi
+}
+
+extract_server_zip() {
+  echo "Unzipping ${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip to ${SERVER_PATH}"
+  unzip -q $ARTIFACTS_PATH/bedrock-server-$VERSION.zip -d $SERVER_PATH
   compare_version
   echo $VERSION > $DATA_PATH/version.txt
 }
@@ -34,6 +54,7 @@ compare_version() {
   if [ -f "${DATA_PATH}/version.txt" ]; then
     OLD_VER=$(cat $DATA_PATH/version.txt)
     if [[ "x${OLD_VER}" != "x${VERSION}" ]]; then
+      echo "Previous version was ${OLD_VER}, current version is ${VERSION}"
       echo "Creating backup of data before version change."
       zip -r $DATA_PATH/backups/${OLD_VER}_to_${VERSION}.mcworld $DATA_PATH/worlds
     fi
@@ -49,7 +70,7 @@ check_symlinks() {
 }
 
 check_addons() {
-  echo "Checking for addons."
+  echo "Checking for new .mcaddon, .mcpack, or .zip files in ${ADDONS_PATH}."
   if [ ! -d "${ADDONS_PATH}" ]; then
     mkdir -p $ADDONS_PATH
   fi
@@ -419,12 +440,18 @@ if [[ "x${EULA^^}" != "xTRUE" ]]; then
   exit 1
 fi
 #Check necessary data directories
-for DIR_NAME in addons backups worlds ; do
+for DIR_NAME in addons backups artifacts worlds ; do
   check_data_dir $DIR_NAME
 done
-#Unzip source
-if [ -f "${ZIP_FILE}" ]; then
-  extract_source
+#Determine download version
+if [[ "x${VERSION^^}" == "xLATEST" ]]; then
+  get_latest_version
+else
+  download_file $DOWNLOAD_ENDPOINT/bedrock-server-$VERSION.zip $ARTIFACTS_PATH/bedrock-server-$VERSION.zip
+fi
+#Unzip server artifact
+if [ -f "${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip" ]; then
+  extract_server_zip
 fi
 #Check necessary symlinks
 for LINK_NAME in worlds Dedicated_Server.txt ; do
@@ -444,9 +471,16 @@ for PACK_TYPE in behavior_packs resource_packs ; do
 done
 
 echo "Starting Minecraft Bedrock Server Version ${VERSION} with the following configuration:"
+echo "#######################################"
+echo "########## SERVER PROPERTIES ##########"
 cat $SERVER_PROPERTIES | grep "=" | grep -v "\#" | sort
+echo "###############################"
+echo "########## WHITELIST ##########"
 cat $SERVER_WHITELIST
+echo "#################################"
+echo "########## PERMISSIONS ##########"
 cat $SERVER_PERMISSIONS
+echo "#################################"
 cd $SERVER_PATH/
 chmod +x bedrock_server
 export LD_LIBRARY_PATH=.
