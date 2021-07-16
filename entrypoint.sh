@@ -52,6 +52,9 @@ download_file(){
 }
 
 extract_server_zip() {
+  if [ ! -d "${SERVER_PATH}" ]; then
+    mkdir -p $SERVER_PATH
+  fi
   echo "Unzipping ${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip to ${SERVER_PATH}"
   unzip -q $ARTIFACTS_PATH/bedrock-server-$VERSION.zip -d $SERVER_PATH
   compare_version
@@ -481,13 +484,14 @@ for PACK_TYPE in behavior_packs resource_packs ; do
 done
 
 echo "Starting Minecraft Bedrock Server Version ${VERSION} with the following configuration:"
-echo "#######################################"
 echo "########## SERVER PROPERTIES ##########"
 cat $SERVER_PROPERTIES | grep "=" | grep -v "\#" | sort
 echo "###############################"
+echo ""
 echo "########## WHITELIST ##########"
 cat $SERVER_WHITELIST
 echo "#################################"
+echo ""
 echo "########## PERMISSIONS ##########"
 cat $SERVER_PERMISSIONS
 echo "#################################"

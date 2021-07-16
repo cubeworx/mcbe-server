@@ -1,7 +1,7 @@
-mcbe-server
+CubeWorx Minecraft Bedrock Edition Server Image
 ==============
 
-This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. The image can be used standalone or combined with mcbe-announcer to host multiple games on the same server.
+This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. The image can be used standalone or combined with mcbe-announce to host multiple games on the same server.
 
 ## Quickstart
 
@@ -11,7 +11,7 @@ docker run -d -it -p 19132:19132/udp -e EULA=true cubeworx/mcbe-server
 
 ## Configuration
 
-The image runs with default or recommended configurations but can be highly customized through env variables.
+The image runs with default or recommended configurations but can be highly customized through environment variables. Changing any of the environment variables from their defaults will update the server.properties file as described here: https://minecraft.fandom.com/wiki/Server.properties#Bedrock_Edition_3
 
 
 ### Customized Default Configuration
@@ -22,42 +22,48 @@ The image runs with default or recommended configurations but can be highly cust
 | `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games        |
 
 
-### Server Properties Environment Variables
+### Basic Server Properties Environment Variables
 
-The following environment variables can be changed from their defaults which will update the server.properties file as described here: https://minecraft.fandom.com/wiki/Server.properties#Bedrock_Edition_3
+The following environment variables are basic ones that you might want to change to customize the game play to your liking. 
 
-- `SERVER_NAME`
-- `GAME_MODE`
-- `FORCE_GAMEMODE`
-- `DIFFICULTY`
 - `ALLOW_CHEATS`
-- `MAX_PLAYERS`
-- `ONLINE_MODE`
-- `WHITE_LIST`
-- `SERVER_PORT`
-- `SERVER_PORTV6`
-- `VIEW_DISTANCE`
-- `TICK_DISTANCE`
-- `PLAYER_IDLE_TIMEOUT`
-- `MAX_THREADS`
+- `DIFFICULTY`
+- `GAME_MODE`
 - `LEVEL_NAME`
 - `LEVEL_SEED`
 - `LEVEL_TYPE`
-- `DEFAULT_PLAYER_PERMISSION_LEVEL`
-- `TEXTUREPACK_REQUIRED`
-- `CONTENT_LOG_FILE_ENABLED`
+- `ONLINE_MODE`
+- `SERVER_NAME`
+- `SERVER_PORT`
+- `WHITE_LIST`
+
+### Advanced Server Properties Environment Variables
+
+The following environment variables are more advanced ones that you might want to change to optimize the management or performance of your server.
+
 - `COMPRESSION_THRESHOLD`
-- `SERVER_AUTHORITATIVE_MOVEMENT`
-- `PLAYER_MOVEMENT_SCORE_THRESHOLD`
+- `CONTENT_LOG_FILE_ENABLED`
+- `CORRECT_PLAYER_MOVEMENT`
+- `DEFAULT_PLAYER_PERMISSION_LEVEL`
+- `FORCE_GAMEMODE`
+- `MAX_PLAYERS`
+- `MAX_THREADS`
+- `PLAYER_IDLE_TIMEOUT`
 - `PLAYER_MOVEMENT_DISTANCE_THRESHOLD`
 - `PLAYER_MOVEMENT_DURATION_THRESHOLD_IN_MS`
-- `CORRECT_PLAYER_MOVEMENT`
+- `PLAYER_MOVEMENT_SCORE_THRESHOLD`
 - `SERVER_AUTHORITATIVE_BLOCK_BREAKING`
+- `SERVER_AUTHORITATIVE_MOVEMENT`
+- `SERVER_PORTV6`
+- `TEXTUREPACK_REQUIRED`
+- `TICK_DISTANCE`
+- `VIEW_DISTANCE`
+
 
 
 ## Volumes
 
-The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `worlds`, `backups`, `addons` and other custom configurations files.
+The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configurations files.
 
 You can maunt this volume on the host via docker-compose:
 ```
