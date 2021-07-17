@@ -1,14 +1,15 @@
-
 FROM debian:10-slim
+
+ARG BUILD_DATE
 
 LABEL cbwx.mcbe-announce.enable=true
 LABEL manymine.enable=true
 LABEL org.opencontainers.image.authors="Cory Claflin"
+LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.licenses='MIT'
 LABEL org.opencontainers.image.source='https://github.com/cubeworx/mcbe-server'
 LABEL org.opencontainers.image.title="CubeWorx Minecraft Bedrock Edition Server Image"
 LABEL org.opencontainers.image.vendor='CubeWorx'
-
 
 ENV MCBE_HOME="/mcbe" \
     DATA_PATH="/mcbe/data" \
