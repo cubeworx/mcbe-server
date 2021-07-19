@@ -89,7 +89,7 @@ docker run -d -it -p 19132:19132/udp -v mcbe-data:/mcbe/data -e EULA=true cubewo
 
 ### Seeds
 Seeds are special codes that can generate worlds in Minecraft when the server is launched. They cover a variety of places and provide new opportunites to build and explore. A seed can only be specified when first launching the server and once a world has been created then adding, changing, or removing the seed has no impact.
-To specify a seed then use the `LEVEL_SEED` environment variable. You can search online to find seeds to play or you can set `LEVEL_SEED=RANDOM` and one will be pulled from the seeds.txt file included in the image.
+To specify a seed then use the `LEVEL_SEED` environment variable. You can search online to find seeds to play or you can set `LEVEL_SEED=random` and one will be pulled from the seeds.txt file included in the image.
 
 
 ### Add-Ons
