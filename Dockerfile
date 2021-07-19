@@ -2,8 +2,9 @@ FROM debian:10-slim
 
 ARG BUILD_DATE
 
-LABEL cbwx.announce.enable=true
-LABEL manymine.enable=true
+LABEL cbwx.announce.enable="true"
+LABEL cbwx.announce.type="bedrock"
+LABEL manymine.enable="true"
 LABEL org.opencontainers.image.authors="Cory Claflin"
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.licenses='MIT'
