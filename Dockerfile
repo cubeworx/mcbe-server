@@ -2,7 +2,7 @@ FROM debian:10-slim
 
 ARG BUILD_DATE
 
-LABEL cbwx.mcbe-announce.enable=true
+LABEL cbwx.announce.enable=true
 LABEL manymine.enable=true
 LABEL org.opencontainers.image.authors="Cory Claflin"
 LABEL org.opencontainers.image.created=$BUILD_DATE
@@ -25,6 +25,11 @@ RUN apt-get update && \
     apt-get -y autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
+    curl -sL https://github.com/itzg/mc-monitor/releases/download/0.9.0/mc-monitor_0.9.0_linux_amd64.tar.gz -o mc-monitor.tar.gz && \
+    mkdir /itzg-mc-monitor && \
+    tar -xzvf mc-monitor.tar.gz --directory=/itzg-mc-monitor && \
+    rm -rf mc-monitor.tar.gz && \
+    chmod +x /itzg-mc-monitor/mc-monitor && \
     mkdir -p $DATA_PATH
 
 WORKDIR $MCBE_HOME
@@ -36,5 +41,7 @@ ADD versions.txt $MCBE_HOME/
 EXPOSE $SERVER_PORT/udp
 EXPOSE $SERVER_PORTV6/udp
 VOLUME $DATA_PATH
+
+HEALTHCHECK --start-period=1m CMD /itzg-mc-monitor/mc-monitor status-bedrock --host 127.0.0.1 --port $SERVER_PORT
 
 ENTRYPOINT ["/entrypoint.sh"]

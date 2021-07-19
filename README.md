@@ -1,7 +1,7 @@
 CubeWorx Minecraft Bedrock Edition Server Image
 ==============
 
-This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. The image can be used standalone or combined with mcbe-announce to host multiple games on the same server.
+This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. It is intended for use in the upcoming CubeWork ecosystem but is also being provided for use in the Minecraft community. The image can be used standalone or combined with [manymine](https://hub.docker.com/r/illiteratealliterator/manymine) to host multiple games on the same server.
 
 ## Quickstart
 
