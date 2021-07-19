@@ -43,7 +43,7 @@ get_latest_version() {
 download_file(){
   DOWNLOAD_URL=$1
   DOWNLOAD_FILE=$2
-  echo "Downloading ${DOWNLOAD_URL}"
+  echo "Downloading ${DOWNLOAD_URL} to ${DOWNLOAD_FILE}"
   curl -Ss $DOWNLOAD_URL -o $DOWNLOAD_FILE
   if [ ! -f $DOWNLOAD_FILE ]; then
     echo "ERROR: File failed to download!"
@@ -456,15 +456,26 @@ fi
 for DIR_NAME in addons backups artifacts worlds ; do
   check_data_dir $DIR_NAME
 done
-#Determine download version
-if [[ "x${VERSION^^}" == "xLATEST" ]]; then
-  get_latest_version
+#Check if already initialized
+if [ ! -f "${SERVER_PATH}/bedrock_server" ]; then
+  echo "Initializing new container."
+  #Determine download version
+  if [[ "x${VERSION^^}" == "xLATEST" ]]; then
+    echo "Checking https://www.minecraft.net for latest version number."
+    get_latest_version
+  else
+    if [ ! -f "${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip" ]; then
+      download_file $DOWNLOAD_ENDPOINT/bedrock-server-$VERSION.zip $ARTIFACTS_PATH/bedrock-server-$VERSION.zip
+    fi
+  fi
+  #Unzip server artifact if $SERVER_PATH doesn't exist
+  if [ -f "${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip" ]; then
+    extract_server_zip
+  fi
 else
-  download_file $DOWNLOAD_ENDPOINT/bedrock-server-$VERSION.zip $ARTIFACTS_PATH/bedrock-server-$VERSION.zip
-fi
-#Unzip server artifact
-if [ -f "${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip" ]; then
-  extract_server_zip
+  #If already initialized, need to read in version
+  echo "Already initialized. Did container restart?"
+  VERSION=$(cat $DATA_PATH/version.txt)
 fi
 #Check necessary symlinks
 for LINK_NAME in worlds Dedicated_Server.txt ; do
