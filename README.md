@@ -65,7 +65,7 @@ The following environment variables are more advanced ones that you might want t
 
 The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configurations files.
 
-You can maunt this volume on the host via docker-compose:
+You can mount this volume on the host via docker-compose:
 ```
 version: '3.8'
 volumes:
