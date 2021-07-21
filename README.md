@@ -1,5 +1,5 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/cubeworx/mcbe-server.svg)](https://hub.docker.com/r/cubeworx/mcbe-server)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cubeworx/mcbe-server/blob/master/LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cubeworx/mcbe-server/blob/master/LICENSE)
 
 CubeWorx Minecraft Bedrock Edition Server Image
 ==============
