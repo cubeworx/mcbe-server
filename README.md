@@ -1,3 +1,6 @@
+[![Docker Pulls](https://img.shields.io/docker/pulls/cubeworx/mcbe-server.svg)](https://hub.docker.com/r/cubeworx/mcbe-server)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cubeworx/mcbe-server/blob/master/LICENSE.md)
+
 CubeWorx Minecraft Bedrock Edition Server Image
 ==============
 
@@ -20,7 +23,6 @@ The image runs with default or recommended configurations but can be highly cust
 |-------------------------------|-------------------------------------------------------------------------|
 | `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name |
 | `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games        |
-
 
 ### Basic Server Properties Environment Variables
 
@@ -60,7 +62,6 @@ The following environment variables are more advanced ones that you might want t
 - `VIEW_DISTANCE`
 
 
-
 ## Volumes
 
 The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configurations files.
@@ -87,12 +88,12 @@ docker run -d -it -p 19132:19132/udp -v mcbe-data:/mcbe/data -e EULA=true cubewo
 ```
 
 
-### Seeds
+## Seeds
 Seeds are special codes that can generate worlds in Minecraft when the server is launched. They cover a variety of places and provide new opportunites to build and explore. A seed can only be specified when first launching the server and once a world has been created then adding, changing, or removing the seed has no impact.
 To specify a seed then use the `LEVEL_SEED` environment variable. You can search online to find seeds to play or you can set `LEVEL_SEED=random` and one will be pulled from the seeds.txt file included in the image.
 
 
-### Add-Ons
+## Add-Ons
 
 Add-ons are ways of enhancing game play by adding custom code and features to the game. Presently supported add-ons are `behavior_packs` and `resource_packs` and end in one of these extensions: `.addons`, `.mcpack`, or `.zip`
 To add an add-on to a server take the following steps:
