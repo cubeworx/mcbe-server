@@ -36,6 +36,7 @@ RUN apt-get update && \
 WORKDIR $MCBE_HOME
 
 ADD entrypoint.sh /
+ADD scripts/ $MCBE_HOME/scripts/
 ADD seeds.txt $MCBE_HOME/
 ADD versions.txt $MCBE_HOME/
 
