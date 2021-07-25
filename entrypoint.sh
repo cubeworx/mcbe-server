@@ -113,7 +113,7 @@ for DIR_NAME in addons backups artifacts worlds ; do
   check_data_dir $DIR_NAME
 done
 #Check if already initialized
-if [ ! -f "${SERVER_PATH}/bedrock_server" ]; then
+if [ ! -f "${SERVER_PATH}/${EXEC_NAME}" ]; then
   echo "Initializing new container."
   #Determine download version
   if [[ "x${VERSION^^}" == "xLATEST" ]]; then
@@ -130,6 +130,7 @@ if [ ! -f "${SERVER_PATH}/bedrock_server" ]; then
   fi
 else
   #If already initialized, need to read in version
+  echo "###########################################"
   echo "Already initialized. Did container restart?"
   VERSION=$(cat $DATA_PATH/version.txt)
 fi
