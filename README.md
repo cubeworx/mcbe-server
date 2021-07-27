@@ -37,7 +37,7 @@ The following environment variables are basic ones that you might want to change
 - `ONLINE_MODE`
 - `SERVER_NAME`
 - `SERVER_PORT`
-- `WHITE_LIST`
+- `WHITELIST_ENABLE`
 
 ### Advanced Server Properties Environment Variables
 
@@ -106,5 +106,7 @@ To add an add-on to a server take the following steps:
 ## Warnings!!!
 
 - Changing the `LEVEL_NAME` value after a world has been created will result in an entire new world being created.
+- It is ok to set `ONLINE_MODE=false` when playing on your home network but it should be set to `true` when your server is publicly accessible!
+- When making your server publicly accessible you should also set `WHITELIST_ENABLE=true` and specify users via `WHITELIST_USERS` to prevent unwanted players from connecting.
 - Add-Ons are currently an experimental feature and not guaranteed to work.  
 

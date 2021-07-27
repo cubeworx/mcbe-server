@@ -132,7 +132,10 @@ update_server_properties() {
   fi
   #ONLINE_MODE
   if [[ "x${ONLINE_MODE}" != "x" ]]; then
-    if [[ "x${ONLINE_MODE,,}" == "xtrue" ]] || [[ "x${ONLINE_MODE,,}" == "xfalse" ]]; then
+    if [[ "x${ONLINE_MODE,,}" == "xfalse" ]] || [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
+      echo "ERROR: ONLINE_MODE can't be 'false' when WHITELIST_ENABLE is 'true'!"
+      exit 1
+    elif [[ "x${ONLINE_MODE,,}" == "xtrue" ]] || [[ "x${ONLINE_MODE,,}" == "xfalse" ]]; then
       sed -i "s/online-mode=.*/online-mode=${ONLINE_MODE}/" $SERVER_PROPERTIES
     else
       echo "ERROR: Invalid option for ONLINE_MODE!"
