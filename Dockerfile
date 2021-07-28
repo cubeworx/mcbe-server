@@ -3,7 +3,7 @@ FROM debian:10-slim
 ARG BUILD_DATE
 
 LABEL cbwx.announce.enable="true"
-LABEL cbwx.announce.type="bedrock"
+LABEL cbwx.announce.type="mcbe"
 LABEL manymine.enable="true"
 LABEL org.opencontainers.image.authors="Cory Claflin"
 LABEL org.opencontainers.image.created=$BUILD_DATE

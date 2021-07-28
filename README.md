@@ -23,6 +23,7 @@ The image runs with default or recommended configurations but can be highly cust
 |-------------------------------|-------------------------------------------------------------------------|
 | `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name |
 | `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games        |
+| `WHITELIST_ENABLE="false"`    | Specify if connected players must be listed in WHITELIST_USERS variable |
 
 ### Basic Server Properties Environment Variables
 
@@ -37,7 +38,6 @@ The following environment variables are basic ones that you might want to change
 - `ONLINE_MODE`
 - `SERVER_NAME`
 - `SERVER_PORT`
-- `WHITELIST_ENABLE`
 
 ### Advanced Server Properties Environment Variables
 

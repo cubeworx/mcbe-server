@@ -9,13 +9,16 @@ ARTIFACTS_PATH=${ARTIFACTS_PATH:-"/mcbe/data/artifacts"}
 DATA_PATH=${DATA_PATH:-"/mcbe/data"}
 DOWNLOAD_ENDPOINT=${DOWNLOAD_ENDPOINT:-"https://minecraft.azureedge.net/bin-linux"}
 EXEC_NAME="cbwx-mcbe-${SERVER_NAME// /-}-server"
+PERMISSIONS_FILE=${PERMISSIONS_FILE:-"permissions.json"}
+PERMISSIONS_MODE=${PERMISSIONS_MODE:-"static"}
 SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
 SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
-SERVER_PERMISSIONS=${SERVER_WHITELIST:-"/mcbe/server/permissions.json"}
 SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
-SERVER_WHITELIST=${SERVER_WHITELIST:-"/mcbe/server/whitelist.json"}
 VERSION=${VERSION:-"LATEST"}
 VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
+WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
+WHITELIST_FILE=${WHITELIST_FILE:-"whitelist.json"}
+XUID_LOOKUP_ENDPOINT=${XUID_LOOKUP_ENDPOINT:-"https://xbl-api.prouser123.me"}
 
 check_data_dir() {
   DIR_NAME=$1
@@ -86,22 +89,6 @@ check_symlinks() {
   fi
 }
 
-update_whitelist() {
-  if [[ "x${WHITELIST_USERS}" != "x" ]] && [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-    jq -n --arg users "${WHITELIST_USERS}" '$users | split(",") | map({"name": .})' > $SERVER_WHITELIST
-  fi
-}
-
-update_permissions() {
-  if [[ "x${OPERATORS}" != "x" ]] || [[ "x${MEMBERS}" != "x" ]] || [[ "x${VISITORS}" != "x" ]]; then
-    jq -n --arg operators "$OPERATORS" --arg members "$MEMBERS" --arg visitors "$VISITORS" '[
-    [$operators | split(",") | map({permission: "operator", xuid:.})],
-    [$members   | split(",") | map({permission: "member", xuid:.})],
-    [$visitors  | split(",") | map({permission: "visitor", xuid:.})]
-    ]| flatten' > $SERVER_PERMISSIONS
-  fi
-}
-
 #Check EULA
 if [[ "x${EULA^^}" != "xTRUE" ]]; then
   echo "ERROR: EULA variable must be TRUE!"
@@ -141,10 +128,10 @@ done
 #Update server.properties
 source $MCBE_HOME/scripts/server-properties.sh
 update_server_properties
-#Update whitelist.json
+#Update permissions & whitelist
+source $MCBE_HOME/scripts/permissions-whitelist.sh
+check_permissions
 update_whitelist
-#Update permissions.json
-update_permissions
 #Check addons
 source $MCBE_HOME/scripts/addons.sh
 check_addons
@@ -159,7 +146,7 @@ cat $SERVER_PROPERTIES | grep "=" | grep -v "\#" | sort
 echo "###############################"
 echo ""
 echo "########## WHITELIST ##########"
-cat $SERVER_WHITELIST
+cat $SERVER_PATH/$WHITELIST_FILE
 echo "#################################"
 echo ""
 echo "########## PERMISSIONS ##########"
