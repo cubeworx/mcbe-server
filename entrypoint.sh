@@ -18,7 +18,7 @@ VERSION=${VERSION:-"LATEST"}
 VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
 WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
 WHITELIST_FILE=${WHITELIST_FILE:-"whitelist.json"}
-XUID_LOOKUP_ENDPOINT=${XUID_LOOKUP_ENDPOINT:-"https://xbl-api.prouser123.me"}
+XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://xbl-api.prouser123.me/profile/settings"}
 
 check_data_dir() {
   DIR_NAME=$1
