@@ -23,7 +23,7 @@ jobs:
 
       # GITHUB_REPOSITORY
       - name: Build image
-        run: docker build --tag latest ${{ GITHUB_REPOSITORY }} .
+        run: docker build --tag latest ${{ env.GITHUB_REPOSITORY }} .
 
       #- name: Log in to Docker Hub
       #  uses: docker/login-action@v1.10.0
