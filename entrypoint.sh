@@ -9,7 +9,7 @@ ARTIFACTS_PATH=${ARTIFACTS_PATH:-"/mcbe/data/artifacts"}
 DATA_PATH=${DATA_PATH:-"/mcbe/data"}
 DOWNLOAD_ENDPOINT=${DOWNLOAD_ENDPOINT:-"https://minecraft.azureedge.net/bin-linux"}
 EXEC_NAME="cbwx-mcbe-${SERVER_NAME// /-}-server"
-PERMISSIONS_FILE=${PERMISSIONS_FILE:-"permissions.json"}
+PERMISSIONS_FILE=${PERMISSIONS_FILE:-"/mcbe/data/permissions.json"}
 PERMISSIONS_MODE=${PERMISSIONS_MODE:-"static"}
 SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
 SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
@@ -17,8 +17,9 @@ SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
 VERSION=${VERSION:-"LATEST"}
 VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
 WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
-WHITELIST_FILE=${WHITELIST_FILE:-"whitelist.json"}
-XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://xbl-api.prouser123.me/profile/settings"}
+WHITELIST_FILE=${WHITELIST_FILE:-"/mcbe/data/whitelist.json"}
+WHITELIST_MODE=${WHITELIST_MODE:-"static"}
+XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://cbwx-dev.e0b751lko3i2u.us-east-1.cs.amazonlightsail.com/profile/settings"}
 
 check_data_dir() {
   DIR_NAME=$1
@@ -61,6 +62,18 @@ extract_server_zip() {
   fi
   echo "Unzipping ${ARTIFACTS_PATH}/bedrock-server-${VERSION}.zip to ${SERVER_PATH}"
   unzip -q $ARTIFACTS_PATH/bedrock-server-$VERSION.zip -d $SERVER_PATH
+  #If permissions.json in server directory exists, delete and create symlink to file in data dir
+  if [ -f "${SERVER_PATH}/permissions.json" ] && [ ! -L "${SERVER_PATH}/permissions.json" ]; then
+    rm -rf $SERVER_PATH/permissions.json
+    echo "Creating symlink ${SERVER_PATH}/permissions.json to ${PERMISSIONS_FILE}"
+    ln -s $PERMISSIONS_FILE $SERVER_PATH/permissions.json
+  fi
+  #If whitelist.json in server directory exists, delete and create symlink to file in data dir
+  if [ -f "${SERVER_PATH}/whitelist.json" ] && [ ! -L "${SERVER_PATH}/whitelist.json" ]; then
+    rm -rf $SERVER_PATH/whitelist.json
+    echo "Creating symlink ${SERVER_PATH}/whitelist.json to ${WHITELIST_FILE}"
+    ln -s $WHITELIST_FILE $SERVER_PATH/whitelist.json
+  fi
   compare_version
   echo $VERSION > $DATA_PATH/version.txt
   echo "Renaming bedrock_server to ${EXEC_NAME} for easier host process identification."
@@ -101,6 +114,7 @@ for DIR_NAME in addons backups artifacts worlds ; do
 done
 #Check if already initialized
 if [ ! -f "${SERVER_PATH}/${EXEC_NAME}" ]; then
+  SERVER_INITIALIZED="false"
   echo "Initializing new container."
   #Determine download version
   if [[ "x${VERSION^^}" == "xLATEST" ]]; then
@@ -116,7 +130,8 @@ if [ ! -f "${SERVER_PATH}/${EXEC_NAME}" ]; then
     extract_server_zip
   fi
 else
-  #If already initialized, need to read in version
+  #If already initialized, need to read in version & not lookup users
+  SERVER_INITIALIZED="true"
   echo "###########################################"
   echo "Already initialized. Did container restart?"
   VERSION=$(cat $DATA_PATH/version.txt)
@@ -128,10 +143,11 @@ done
 #Update server.properties
 source $MCBE_HOME/scripts/server-properties.sh
 update_server_properties
-#Update permissions & whitelist
+#Check permissions & whitelist
 source $MCBE_HOME/scripts/permissions-whitelist.sh
+check_whitelist
 check_permissions
-update_whitelist
+create_cache_files
 #Check addons
 source $MCBE_HOME/scripts/addons.sh
 check_addons
@@ -145,12 +161,12 @@ echo "########## SERVER PROPERTIES ##########"
 cat $SERVER_PROPERTIES | grep "=" | grep -v "\#" | sort
 echo "###############################"
 echo ""
-echo "########## WHITELIST ##########"
-cat $SERVER_PATH/$WHITELIST_FILE
+echo "########## PERMISSIONS ##########"
+cat $PERMISSIONS_FILE
 echo "#################################"
 echo ""
-echo "########## PERMISSIONS ##########"
-cat $SERVER_PERMISSIONS
+echo "########## WHITELIST ##########"
+cat $WHITELIST_FILE
 echo "#################################"
 cd $SERVER_PATH/
 export LD_LIBRARY_PATH=.
