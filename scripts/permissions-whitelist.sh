@@ -19,13 +19,23 @@ check_whitelist() {
     exit 1
   fi
   #If whitelist is enabled check usernames
-  #Because whitelist.json is case sensitive need to verify gamertag
+  #Because whitelist.json is case sensitive prefer to verify gamertag
   if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
     #If WHITELIST_USERS not empty and not already initialized
     if [[ "x${WHITELIST_USERS}" != "x" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]]; then
-      for USER in $(echo $WHITELIST_USERS | sed "s/,/ /g"); do
-        lookup_xbl_profile gamertag $USER
-      done
+      #If lookup enabled verify from api
+      if [[ "x${WHITELIST_LOOKUP,,}" == "xtrue" ]]; then
+        for USER in $(echo $WHITELIST_USERS | sed "s/,/ /g"); do
+          lookup_xbl_profile gamertag $USER
+        done
+      #If lookup disabled write values from env vars
+      elif [[ "x${WHITELIST_LOOKUP,,}" == "xfalse" ]]; then
+        jq -n --arg users "${WHITELIST_USERS}" '$users | split(",") | map({"name": .})' > $WHITELIST_FILE
+      else
+        echo "ERROR: Invalid option for WHITELIST_LOOKUP!"
+        echo "Options are: 'true' or 'false'"
+        exit 1
+      fi
     fi
   fi
 }
@@ -47,12 +57,26 @@ check_permissions() {
     echo "Options are: 'static' or 'dymamic'"
     exit 1
   fi
-  #If environment variables aren't empty then update permission levels if not intialized
+  #If environment variables aren't empty then update permissions if not intialized
   if [[ "x${OPERATORS}" != "x" ]] || [[ "x${MEMBERS}" != "x" ]] || [[ "x${VISITORS}" != "x" ]]; then
     if [[ "x${SERVER_INITIALIZED}" == "xfalse" ]]; then
-      check_permission_levels operator $OPERATORS
-      check_permission_levels member $MEMBERS
-      check_permission_levels visitor $VISITORS
+      #If lookup enabled verify from api
+      if [[ "x${PERMISSIONS_LOOKUP,,}" == "xtrue" ]]; then
+        check_permission_levels operator $OPERATORS
+        check_permission_levels member $MEMBERS
+        check_permission_levels visitor $VISITORS
+      #If lookup disabled write values from env vars
+      elif [[ "x${PERMISSIONS_LOOKUP,,}" == "xfalse" ]]; then
+        jq -n --arg operators "$OPERATORS" --arg members "$MEMBERS" --arg visitors "$VISITORS" '[
+        [$operators | split(",") | map({permission: "operator", xuid:.})],
+        [$members   | split(",") | map({permission: "member", xuid:.})],
+        [$visitors  | split(",") | map({permission: "visitor", xuid:.})]
+        ]| flatten' > $PERMISSIONS_FILE
+      else
+        echo "ERROR: Invalid option for PERMISSIONS_LOOKUP!"
+        echo "Options are: 'true' or 'false'"
+        exit 1
+      fi
     fi
   fi
 }

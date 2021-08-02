@@ -10,6 +10,7 @@ DATA_PATH=${DATA_PATH:-"/mcbe/data"}
 DOWNLOAD_ENDPOINT=${DOWNLOAD_ENDPOINT:-"https://minecraft.azureedge.net/bin-linux"}
 EXEC_NAME="cbwx-mcbe-${SERVER_NAME// /-}-server"
 PERMISSIONS_FILE=${PERMISSIONS_FILE:-"/mcbe/data/permissions.json"}
+PERMISSIONS_LOOKUP=${PERMISSIONS_LOOKUP:-"true"}
 PERMISSIONS_MODE=${PERMISSIONS_MODE:-"static"}
 SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
 SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
@@ -18,8 +19,9 @@ VERSION=${VERSION:-"LATEST"}
 VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
 WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
 WHITELIST_FILE=${WHITELIST_FILE:-"/mcbe/data/whitelist.json"}
+WHITELIST_LOOKUP=${WHITELIST_LOOKUP:-"true"}
 WHITELIST_MODE=${WHITELIST_MODE:-"static"}
-XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://cbwx-dev.e0b751lko3i2u.us-east-1.cs.amazonlightsail.com/profile/settings"}
+XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://xbl-api.prouser123.me/profile/settings"}
 
 check_data_dir() {
   DIR_NAME=$1
