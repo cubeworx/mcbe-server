@@ -4,7 +4,7 @@
 CubeWorx Minecraft Bedrock Edition Server Image
 ==============
 
-This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. It is intended for use in the upcoming CubeWork ecosystem but is also being provided for use in the Minecraft community. The image can be used standalone or combined with [manymine](https://hub.docker.com/r/illiteratealliterator/manymine) to host multiple games on the same server.
+This image is a self-contained Minecraft Bedrock Edition Server with support for add-ons. It is intended for use in the upcoming CubeWorx ecosystem but is also being provided for use in the Minecraft community. The image can be used standalone or combined with [manymine](https://hub.docker.com/r/illiteratealliterator/manymine) to host multiple games on the same server.
 
 ## Quickstart
 
@@ -19,10 +19,15 @@ The image runs with default or recommended configurations but can be highly cust
 
 ### Customized Default Configuration
 
-|                               |                                                                         |
-|-------------------------------|-------------------------------------------------------------------------|
-| `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name |
-| `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games        |
+|                               |                                                                           |
+|-------------------------------|---------------------------------------------------------------------------|
+| `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name   |
+| `PERMISSIONS_LOOKUP="true"`   | Specify if player xuids get verified from online api or written as is     |
+| `PERMISSIONS_MODE="static"`   | Specify if permissions file gets overwritten every time container starts  |
+| `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games          |
+| `WHITELIST_ENABLE="false"`    | Specify if connected players must be listed in WHITELIST_USERS variable   |
+| `WHITELIST_LOOKUP="true"`     | Specify if player usernames get verified from online api or written as is |
+| `WHITELIST_MODE="static"`     | Specify if whitelist file gets overwritten every time container starts    |
 
 ### Basic Server Properties Environment Variables
 
@@ -37,7 +42,6 @@ The following environment variables are basic ones that you might want to change
 - `ONLINE_MODE`
 - `SERVER_NAME`
 - `SERVER_PORT`
-- `WHITELIST_ENABLE`
 
 ### Advanced Server Properties Environment Variables
 
@@ -87,8 +91,34 @@ docker volume create mcbe-data
 docker run -d -it -p 19132:19132/udp -v mcbe-data:/mcbe/data -e EULA=true cubeworx/mcbe-server
 ```
 
+## Online Mode
+
+If your server will not be exposed to the internet and players will only be connecting from tablets, consoles, etc. on the local network then you may want to set `ONLINE_MODE=false` so that players connecting to your server won't have to authticate. This is especially useful if you have younger children playing on tablets that don't have their own Microsoft accounts.
+
+
+## Whitelist
+
+The whitelist is the list of player usernames that are allowed to connect to your server when `WHITELIST_ENABLE="true"` which should be set if your server is going to be publicly accessible. By default the whitelist file gets overwritten whenever the container starts/restarts to ensure that the usernames match what is in the config.
+Setting `WHITELIST_MODE="dynamic"` will allow whitelist changes made in the game from supported clients to be retained upon start/restart of the container. Since usernames are case-sensitive, they are verified against an xbox live API to make sure there aren't any mistakes. This lookup can be disabled by setting `WHITELIST_LOOKUP="false"`.
+The whitelist file is generated from the names included in the `WHITELIST_USERS`, `OPERATORS`, `MEMBERS`, & `VISITORS`. It is not necessary to enter a username in more than one environment variable. The following example will result in five names being added to the whitelist.
+
+```
+-e WHITELIST_USERS=player1,player2,player3 -e OPERATORS=operator1 -e MEMBERS=member1
+```
+
+## Permissions
+
+Permissions variables can be a list of usernames or XUIDs since the values are verified against an xbox live API when the container first starts. This lookup can be disabled by setting `PERMISSIONS_LOOKUP="false"` but then will require exact XUIDs to be entered for each user.
+By default the permissions file gets overwritten whenever the container starts/restarts to ensure that the username permissions match what is in the config. Setting `PERMISSIONS_MODE="dynamic"` will allow permission changes made in the game from supported clients to be retained upon start/restart of the container.
+If `WHITELIST_ENABLE="true"` then players in the `OPERATORS`, `MEMBERS`, or `VISITORS` will automatically be added to the server whitelist.
+
+```
+-e OPERATORS=operator1,8675309124 -e MEMBERS=member1,1234567890,member2 -e VISITORS=visitor1
+```
+
 
 ## Seeds
+
 Seeds are special codes that can generate worlds in Minecraft when the server is launched. They cover a variety of places and provide new opportunites to build and explore. A seed can only be specified when first launching the server and once a world has been created then adding, changing, or removing the seed has no impact.
 To specify a seed then use the `LEVEL_SEED` environment variable. You can search online to find seeds to play or you can set `LEVEL_SEED=random` and one will be pulled from the seeds.txt file included in the image.
 
@@ -106,7 +136,5 @@ To add an add-on to a server take the following steps:
 ## Warnings!!!
 
 - Changing the `LEVEL_NAME` value after a world has been created will result in an entire new world being created.
-- It is ok to set `ONLINE_MODE=false` when playing on your home network but it should be set to `true` when your server is publicly accessible!
-- When making your server publicly accessible you should also set `WHITELIST_ENABLE=true` and specify users via `WHITELIST_USERS` to prevent unwanted players from connecting.
 - Add-Ons are currently an experimental feature and not guaranteed to work.  
 
