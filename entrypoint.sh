@@ -21,7 +21,7 @@ WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
 WHITELIST_FILE=${WHITELIST_FILE:-"/mcbe/data/whitelist.json"}
 WHITELIST_LOOKUP=${WHITELIST_LOOKUP:-"true"}
 WHITELIST_MODE=${WHITELIST_MODE:-"static"}
-XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://xbl-api.prouser123.me/profile/settings"}
+XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://api.cubeworx.io/mcbe/lookup"}
 
 check_data_dir() {
   DIR_NAME=$1

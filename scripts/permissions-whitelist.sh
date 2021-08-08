@@ -103,7 +103,7 @@ lookup_xbl_profile() {
   XBL_STRING=$2
   PERMISSIONS_LEVEL_NAME=$3
   #Make call to get xbl profile data
-  XBL_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server" -H "accept-language:*" $XBL_LOOKUP_URL/$XBL_LOOKUP/$XBL_STRING)
+  XBL_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server:${VERSION}" -H "accept-language:*" $XBL_LOOKUP_URL/$XBL_LOOKUP/$XBL_STRING)
   #If receive proper data update permissions, otherwise fail silently
   if [[ $(echo $XBL_PROFILE_DATA | grep hostId | grep Gamertag | wc -l) -ne 0 ]]; then
     XBL_GAMERTAG=$(echo $XBL_PROFILE_DATA | jq -r '.profileUsers[].settings[]|select(.id == "Gamertag").value')
