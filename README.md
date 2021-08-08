@@ -98,7 +98,7 @@ If your server will not be exposed to the internet and players will only be conn
 
 ## CubeWorx API
 
-The CubeWorx API is being developed to help with automatically looking up information such: versions, gamertags, xuids, etc. This API is currently *exerimental* and not guaranteed. If you experience issues with the API returning the correct information you can:
+The CubeWorx API is being developed to help with automatically looking up information such: versions, gamertags, xuids, etc. This API is currently **exerimental** and not guaranteed. If you experience issues with the API returning the correct information you can:
 
 - Try setting `XBL_LOOKUP_URL=https://xbl-api.prouser123.me/profile/settings`
 - Set `PERMISSIONS_LOOKUP="false"` and `WHITELIST_LOOKUP="false"`
@@ -143,7 +143,7 @@ To add an add-on to a server take the following steps:
 ## Warnings!!!
 
 - Changing the `LEVEL_NAME` value after a world has been created will result in an entire new world being created.
-- Add-Ons are currently an *experimental* feature and not guaranteed to work.
+- Add-Ons are currently an **experimental** feature and not guaranteed to work.
 
 ## Thanks
 
