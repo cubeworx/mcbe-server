@@ -96,6 +96,13 @@ docker run -d -it -p 19132:19132/udp -v mcbe-data:/mcbe/data -e EULA=true cubewo
 If your server will not be exposed to the internet and players will only be connecting from tablets, consoles, etc. on the local network then you may want to set `ONLINE_MODE=false` so that players connecting to your server won't have to authticate. This is especially useful if you have younger children playing on tablets that don't have their own Microsoft accounts.
 
 
+## CubeWorx API
+
+The CubeWorx API is being developed to help with automatically looking up information such: versions, gamertags, xuids, etc. This API is currently **exerimental** and not guaranteed. If you experience issues with the API returning the correct information you can:
+
+- Try setting `XBL_LOOKUP_URL=https://xbl-api.prouser123.me/profile/settings`
+- Set `PERMISSIONS_LOOKUP="false"` and `WHITELIST_LOOKUP="false"`
+
 ## Whitelist
 
 The whitelist is the list of player usernames that are allowed to connect to your server when `WHITELIST_ENABLE="true"` which should be set if your server is going to be publicly accessible. By default the whitelist file gets overwritten whenever the container starts/restarts to ensure that the usernames match what is in the config.
@@ -136,5 +143,8 @@ To add an add-on to a server take the following steps:
 ## Warnings!!!
 
 - Changing the `LEVEL_NAME` value after a world has been created will result in an entire new world being created.
-- Add-Ons are currently an experimental feature and not guaranteed to work.  
+- Add-Ons are currently an **experimental** feature and not guaranteed to work.
 
+## Thanks
+
+This image was initially inspired by [itzg/docker-minecraft-bedrock-server](https://github.com/itzg/docker-minecraft-bedrock-server)! He has several Minecraft related repositories so be sure to check them out!
