@@ -1,5 +1,8 @@
+[![Build](https://img.shields.io/github/workflow/status/cubeworx/mcbe-server/Build%20&%20Push%20Docker%20Image)](https://github.com/cubeworx/mcbe-server/actions)
 [![Docker Pulls](https://img.shields.io/docker/pulls/cubeworx/mcbe-server.svg)](https://hub.docker.com/r/cubeworx/mcbe-server)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/cubeworx/mcbe-server/latest)](https://hub.docker.com/r/cubeworx/mcbe-server)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cubeworx/mcbe-server/blob/master/LICENSE)
+[![Twitter](https://img.shields.io/twitter/follow/cubeworx?label=Follow&style=social)](https://twitter.com/intent/follow?screen_name=cubeworx)
 
 CubeWorx Minecraft Bedrock Edition Server Image
 ==============
@@ -14,7 +17,7 @@ docker run -d -it -p 19132:19132/udp -e EULA=true cubeworx/mcbe-server
 
 ## Configuration
 
-The image runs with default or recommended configurations but can be highly customized through environment variables. Changing any of the environment variables from their defaults will update the server.properties file as described here: https://minecraft.fandom.com/wiki/Server.properties#Bedrock_Edition_3
+The image runs with default or recommended configurations but can be customized through environment variables. Changing any of the environment variables from their defaults will update the server.properties file as described here: https://minecraft.fandom.com/wiki/Server.properties#Bedrock_Edition_3
 
 
 ### Customized Default Configuration
@@ -24,7 +27,7 @@ The image runs with default or recommended configurations but can be highly cust
 | `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name   |
 | `PERMISSIONS_LOOKUP="true"`   | Specify if player xuids get verified from online api or written as is     |
 | `PERMISSIONS_MODE="static"`   | Specify if permissions file gets overwritten every time container starts  |
-| `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up in Friends tab under LAN Games          |
+| `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up under LAN Games in the Friends tab      |
 | `WHITELIST_ENABLE="false"`    | Specify if connected players must be listed in WHITELIST_USERS variable   |
 | `WHITELIST_LOOKUP="true"`     | Specify if player usernames get verified from online api or written as is |
 | `WHITELIST_MODE="static"`     | Specify if whitelist file gets overwritten every time container starts    |
@@ -68,7 +71,7 @@ The following environment variables are more advanced ones that you might want t
 
 ## Volumes
 
-The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configurations files.
+The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configuration files.
 
 You can mount this volume on the host via docker-compose:
 ```
@@ -98,7 +101,7 @@ If your server will not be exposed to the internet and players will only be conn
 
 ## CubeWorx API
 
-The CubeWorx API is being developed to help with automatically looking up information such: versions, gamertags, xuids, etc. This API is currently **exerimental** and not guaranteed. If you experience issues with the API returning the correct information you can:
+The CubeWorx API is being developed to help with automatically looking up information such as: versions, gamertags, xuids, etc. This API is currently **exerimental** and not guaranteed. If you experience issues with the API returning the correct information you can:
 
 - Try setting `XBL_LOOKUP_URL=https://xbl-api.prouser123.me/profile/settings`
 - Set `PERMISSIONS_LOOKUP="false"` and `WHITELIST_LOOKUP="false"`
