@@ -30,8 +30,8 @@ jobs:
           BUILD_DATE=$(date +%Y.%m.%d)
           #echo $IMG_VER
           #echo $BUILD_DATE
-          echo ${{ env.GITHUB_REPOSITORY }}
           echo $GITHUB_REPOSITORY
+          env | sort
  #         docker build --pull --build-arg BUILD_DATE=$BUILD_DATE --tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER .
  #         docker tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER ${{ env.GITHUB_REPOSITORY }}:latest
  #         docker push ${{ env.GITHUB_REPOSITORY }}:$IMG_VER 
