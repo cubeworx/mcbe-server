@@ -26,8 +26,8 @@ jobs:
       - name: Set Variables
         run: |
           eval "$(date +'today=%F now=%s')"
-          export IMG_VER="$(date +%Y.%m.%d).$((now - $(date -d "$today 0" +%s)))"
-          export BUILD_DATE=$(date +%Y.%m.%d)
+          IMG_VER="$(date +%Y.%m.%d).$((now - $(date -d "$today 0" +%s)))"
+          BUILD_DATE=$(date +%Y.%m.%d)
           echo $IMG_VER
           echo $BUILD_DATE
           #docker build --force-rm --pull --build-arg BUILD_DATE=${{ env.BUILD_DATE }} --tag ${{ env.GITHUB_REPOSITORY }}:${{ env.IMG_VER }} .
@@ -36,8 +36,8 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2.6.1
         with:
-          build-args: BUILD_DATE=${{ env.BUILD_DATE }}
+          build-args: BUILD_DATE=$BUILD_DATE
           context: .
           pull: true
           push: true
-          tags: ${{ env.GITHUB_REPOSITORY }}:${{ env.IMG_VER }},${{ env.GITHUB_REPOSITORY }}:latest
+          tags: ${{ env.GITHUB_REPOSITORY }}:$IMG_VER,${{ env.GITHUB_REPOSITORY }}:latest
