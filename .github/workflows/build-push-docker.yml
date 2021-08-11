@@ -30,10 +30,12 @@ jobs:
           BUILD_DATE=$(date +%Y.%m.%d)
           #echo $IMG_VER
           #echo $BUILD_DATE
-          docker build --pull --build-arg BUILD_DATE=$BUILD_DATE --tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER .
-          docker tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER ${{ env.GITHUB_REPOSITORY }}:latest
-          docker push ${{ env.GITHUB_REPOSITORY }}:$IMG_VER 
-          docker push ${{ env.GITHUB_REPOSITORY }}:latest
+          echo ${{ env.GITHUB_REPOSITORY }}
+          echo $GITHUB_REPOSITORY
+ #         docker build --pull --build-arg BUILD_DATE=$BUILD_DATE --tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER .
+ #         docker tag ${{ env.GITHUB_REPOSITORY }}:$IMG_VER ${{ env.GITHUB_REPOSITORY }}:latest
+ #         docker push ${{ env.GITHUB_REPOSITORY }}:$IMG_VER 
+ #         docker push ${{ env.GITHUB_REPOSITORY }}:latest
 
 #       - name: Build and push Docker images
 #         uses: docker/build-push-action@v2.6.1
