@@ -5,6 +5,8 @@ on:
   # Triggers the workflow on push events for the master branch
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
   # Allows this workflow to be ran manually from the Actions tab
   workflow_dispatch:
 
@@ -23,20 +25,27 @@ jobs:
           timezoneLinux: "America/Chicago"
 
       - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1.10.0
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build Docker Image & Push To Hub
+      - name: Build Docker Image
         run: |
           eval "$(date +'today=%F now=%s')"
           IMG_VER="$(date +%Y.%m.%d).$((now - $(date -d "$today 0" +%s)))"
           BUILD_DATE=$(date +%Y.%m.%d)
-          #echo $IMG_VER
-          #echo $BUILD_DATE
           docker build --pull --build-arg BUILD_DATE=$BUILD_DATE --tag cubeworx/mcbe-server:$IMG_VER .
           docker tag cubeworx/mcbe-server:$IMG_VER cubeworx/mcbe-server:latest
+          echo $IMG_VER > version.txt
+          #docker push cubeworx/mcbe-server:$IMG_VER 
+          #docker push cubeworx/mcbe-server:latest
+
+      - name: Push Docker Image
+        if: github.event_name != 'pull_request'
+        run: |
+          IMG_VER="$(cat version.txt)
           docker push cubeworx/mcbe-server:$IMG_VER 
           docker push cubeworx/mcbe-server:latest
 
@@ -48,3 +57,11 @@ jobs:
 #           pull: true
 #           push: true
 #           tags: ${{ env.GITHUB_REPOSITORY }}:$IMG_VER,${{ env.GITHUB_REPOSITORY }}:latest
+
+      - uses: ethomson/send-tweet-action@v1.0.0
+        with:
+          status: "New version of CubeWorx Minecraft Bedrock Edition Server Image released: https://hub.docker.com/r/cubeworx/mcbe-server/tags?page=1&ordering=last_updated"
+          consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
