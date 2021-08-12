@@ -45,7 +45,7 @@ jobs:
       - name: Push Docker Image
         if: github.event_name != 'pull_request'
         run: |
-          IMG_VER="$(cat version.txt)
+          IMG_VER=$(cat version.txt)
           docker push cubeworx/mcbe-server:$IMG_VER 
           docker push cubeworx/mcbe-server:latest
 
