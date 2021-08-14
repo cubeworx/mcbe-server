@@ -1,5 +1,6 @@
 [![Build](https://img.shields.io/github/workflow/status/cubeworx/mcbe-server/Build%20&%20Push%20Docker%20Image)](https://github.com/cubeworx/mcbe-server/actions)
 [![Docker Pulls](https://img.shields.io/docker/pulls/cubeworx/mcbe-server.svg)](https://hub.docker.com/r/cubeworx/mcbe-server)
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/cubeworx/mcbe-server?sort=semver)](https://hub.docker.com/r/cubeworx/mcbe-server)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/cubeworx/mcbe-server/latest)](https://hub.docker.com/r/cubeworx/mcbe-server)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cubeworx/mcbe-server/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/cubeworx?label=Follow&style=social)](https://twitter.com/intent/follow?screen_name=cubeworx)
