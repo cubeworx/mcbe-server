@@ -5,8 +5,16 @@ on:
   # Triggers the workflow on push events for the master branch
   push:
     branches: [ master ]
+    paths:
+      - 'Dockerfile'
+      - '**.sh'
+      - '**.txt'
   pull_request:
     branches: [ master ]
+    paths:
+      - 'Dockerfile'
+      - '**.sh'
+      - '**.txt'
   # Allows this workflow to be ran manually from the Actions tab
   workflow_dispatch:
 
