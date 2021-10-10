@@ -72,7 +72,7 @@ The following environment variables are more advanced ones that you might want t
 
 ## Volumes
 
-The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` and other custom configuration files.
+The image utilizes a volume at the `/mcbe/data` path for persistent storage. This path contains `addons`, `artifacts`, `backups`, `worlds` folders and custom configuration files.
 
 You can mount this volume on the host via docker-compose:
 ```
@@ -136,7 +136,7 @@ To specify a seed then use the `LEVEL_SEED` environment variable. You can search
 
 ## Add-Ons
 
-Add-ons are ways of enhancing game play by adding custom code and features to the game. Presently supported add-ons are `behavior_packs` and `resource_packs` and end in one of these extensions: `.addons`, `.mcpack`, or `.zip`
+Add-ons are ways of enhancing game play by adding custom code and features to the game. Presently supported add-ons are `behavior_packs` and `resource_packs` and end in one of these extensions: `.mcaddon`, `.mcpack`, or `.zip`. For best results don't use add-ons that have spaces or special characters in the file name.
 To add an add-on to a server take the following steps:
 
 1. Launch a new server with a volume mounted to the host.

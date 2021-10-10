@@ -10,24 +10,36 @@ check_addons() {
     EXT_CHECK=$(ls -alh $ADDONS_PATH 2> /dev/null | grep ".${EXT_TYPE}" | wc -l)
     if [[ $EXT_CHECK -ne 0 ]]; then
       for FNAME in $ADDONS_PATH/*.$EXT_TYPE ; do
+        TMP_DIR=$(mktemp -d -t addon-XXXX --tmpdir=$MCBE_HOME)
         echo "Unzipping ${FNAME}"
-        unzip -q $FNAME -d $ADDONS_PATH/unzipped
+        unzip -q "${FNAME}" -d $TMP_DIR
         #If manifest.json exists then file is a pack
-        if [ -f "${ADDONS_PATH}/unzipped/manifest.json" ]; then
-          move_pack "${ADDONS_PATH}/unzipped"
+        if [ -f "${TMP_DIR}/manifest.json" ]; then
+          move_pack "${TMP_DIR}"
         else
+          #Check TMP_DIR for compressed files again
+          for EXT_TYPE2 in mcaddon mcpack zip ; do
+            EXT_CHECK2=$(ls -alh "${TMP_DIR}" 2> /dev/null | grep ".${EXT_TYPE2}" | wc -l)
+            if [[ $EXT_CHECK2 -ne 0 ]]; then
+              for FNAME2 in ${TMP_DIR}/*.${EXT_TYPE2} ; do
+                echo "Unzipping ${FNAME2}"
+                unzip -q "${FNAME2}" -d $TMP_DIR
+                rm -rf "${FNAME2}"
+              done
+            fi
+          done
           #If folders exist, loop through looking for manifest.json
-          for DIR in $ADDONS_PATH/unzipped/*/ ; do
+          for DIR in $TMP_DIR/*/ ; do
             if [ -f "${DIR}/manifest.json" ]; then
               move_pack "${DIR}"
             fi
           done
         fi
         #Delete temporary directory if it exists
-        if [ -d "${ADDONS_PATH}/unzipped" ]; then
-          rm -rf $ADDONS_PATH/unzipped
+        if [ -d "${TMP_DIR}" ]; then
+          rm -rf $TMP_DIR
         fi
-        rm -rf $FNAME
+        rm -rf "${FNAME}"
       done
     fi
   done
@@ -35,8 +47,8 @@ check_addons() {
 
 move_pack() {
   PACK_TMP_PATH=$1
-  PACK_UUID=$(cat $PACK_TMP_PATH/manifest.json | jq -cr '.header.uuid')
-  PACK_TYPE=$(cat $PACK_TMP_PATH/manifest.json | jq -cr '.modules[].type')
+  PACK_UUID=$(cat "${PACK_TMP_PATH}/manifest.json" | jq -cr '.header.uuid')
+  PACK_TYPE=$(cat "${PACK_TMP_PATH}/manifest.json" | jq -cr '.modules[].type')
   if [[ "x${PACK_TYPE,,}" == "xdata" ]] || [[ "x${PACK_TYPE,,}" == "xresources" ]]; then
     if [[ "x${PACK_TYPE,,}" == "xdata" ]]; then
       PACK_TYPE_FOLDER="behavior_packs"
@@ -67,9 +79,9 @@ check_pack_type() {
     #If folders exist, loop through looking for manifest.json
     for PACK_DIR in $ADDONS_PATH/$PACK_TYPE/*/ ; do
       if [ -f "${PACK_DIR}/manifest.json" ]; then
-        PACK_NAME=$(cat $PACK_DIR/manifest.json | jq -cr '.header.name')
+        PACK_NAME=$(cat "${PACK_DIR}/manifest.json" | jq -cr '.header.name')
         PACK_UUID=$(basename $PACK_DIR)
-        PACK_VERSION=$(cat $PACK_DIR/manifest.json | jq -cr '.header.version')
+        PACK_VERSION=$(cat "${PACK_DIR}/manifest.json" | jq -cr '.header.version')
         PACK_SERVER_PATH=$SERVER_PATH/$PACK_TYPE/$PACK_UUID
         #Create symlink if not exists
         if [ ! -L "${SERVER_PATH}/${PACK_TYPE}/${PACK_UUID}" ]; then
