@@ -19,14 +19,14 @@ check_whitelist() {
     exit 1
   fi
   #If whitelist is enabled check usernames
-  #Because whitelist.json is case sensitive prefer to verify gamertag
+  #Because whitelist.json is case sensitive prefer to verify username
   if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
     #If WHITELIST_USERS not empty and not already initialized
     if [[ "x${WHITELIST_USERS}" != "x" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]]; then
       #If lookup enabled verify from api
       if [[ "x${WHITELIST_LOOKUP,,}" == "xtrue" ]]; then
         for USER in $(echo $WHITELIST_USERS | sed "s/,/ /g"); do
-          lookup_xbl_profile gamertag $USER
+          lookup_player_profile $USER
         done
       #If lookup disabled write values from env vars
       elif [[ "x${WHITELIST_LOOKUP,,}" == "xfalse" ]]; then
@@ -83,37 +83,29 @@ check_permissions() {
 
 check_permission_levels() {
   PERMISSIONS_LEVEL_NAME=$1
-  PERMISSIONS_LEVEL_STRING=$2
-  if [[ "x${PERMISSIONS_LEVEL_STRING}" != "x" ]]; then
-    for STRING in $(echo $PERMISSIONS_LEVEL_STRING | sed "s/,/ /g"); do
-      #Determine if value is xuid or gamertag
-      #TODO: not reliable if gamertag is just numbers
-      if [[ "${STRING}" =~ ^[0-9]+$ ]]; then
-        LOOKUP="xuid"
-      else
-        LOOKUP="gamertag"
-      fi
-      lookup_xbl_profile $LOOKUP $STRING $PERMISSIONS_LEVEL_NAME
+  PERMISSIONS_LEVEL_PLAYERS=$2
+  if [[ "x${PERMISSIONS_LEVEL_PLAYERS}" != "x" ]]; then
+    for PLAYER in $(echo PERMISSIONS_LEVEL_PLAYERS | sed "s/,/ /g"); do
+      lookup_player_profile $PLAYER $PERMISSIONS_LEVEL_NAME
     done
   fi
 }
 
-lookup_xbl_profile() {
-  XBL_LOOKUP=$1
-  XBL_STRING=$2
-  PERMISSIONS_LEVEL_NAME=$3
-  #Make call to get xbl profile data
-  XBL_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server:${VERSION}" -H "accept-language:*" $XBL_LOOKUP_URL/$XBL_LOOKUP/$XBL_STRING)
+lookup_player_profile() {
+  $PLAYER=$1
+  PERMISSIONS_LEVEL_NAME=$2
+  #Make call to get player profile data
+  PLAYER_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server:${VERSION}" -H "accept-language:*" $PLAYER_LOOKUP_URL/$PLAYER)
   #If receive proper data update permissions, otherwise fail silently
-  if [[ $(echo $XBL_PROFILE_DATA | grep hostId | grep Gamertag | wc -l) -ne 0 ]]; then
-    XBL_GAMERTAG=$(echo $XBL_PROFILE_DATA | jq -r '.profileUsers[].settings[]|select(.id == "Gamertag").value')
-    XBL_XUID=$(echo $XBL_PROFILE_DATA | jq -r '.profileUsers[].id')
+  if [[ $(echo $PLAYER_PROFILE_DATA | grep "player.found" | wc -l) -ne 0 ]]; then
+    PLAYER_USERNAME=$(echo $PLAYER_PROFILE_DATA | jq -r '.data.player.username')
+    PLAYER_XUID=$(echo $PLAYER_PROFILE_DATA | jq -r '.data.player.id')
     if [[ "x${PERMISSIONS_LEVEL_NAME}" != "x" ]]; then
-      update_permissions $XBL_GAMERTAG $XBL_XUID $PERMISSIONS_LEVEL_NAME
+      update_permissions $PLAYER_USERNAME $PLAYER_XUID $PERMISSIONS_LEVEL_NAME
     fi
     #Update whitelist too
     if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-      update_whitelist $XBL_GAMERTAG $XBL_XUID $PERMISSIONS_LEVEL_NAME
+      update_whitelist $PLAYER_USERNAME $PLAYER_XUID $PERMISSIONS_LEVEL_NAME
     fi
   fi
 }
