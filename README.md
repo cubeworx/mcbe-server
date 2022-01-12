@@ -143,6 +143,7 @@ To add an add-on to a server take the following steps:
 2. Copy the compressed add-on file into the `addons` folder of the data directory on the host.
 3. Restart the container for the startup script to detect the addons and add them to their respective directories.
 
+A list of add-ons that have been tested with the mcbe-server image can be found in [Addons.md](Addons.md). If you test an add-on, please consider adding it to the list.
 
 ## Warnings!!!
 
