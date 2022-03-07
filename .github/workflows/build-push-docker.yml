@@ -25,7 +25,7 @@ jobs:
 
     steps:
       # Checkout repository 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set Timezone
         uses: szenius/set-timezone@v1.0
