@@ -5,6 +5,10 @@ set -e
 EULA=$EULA
 MCBE_HOME=${MCBE_HOME:-"/mcbe"}
 ADDONS_PATH=${ADDONS_PATH:-"/mcbe/data/addons"}
+ALLOWLIST_ENABLE=${ALLOWLIST_ENABLE:-"false"}
+ALLOWLIST_FILE=${ALLOWLIST_FILE:-"/mcbe/data/allowlist.json"}
+ALLOWLIST_LOOKUP=${ALLOWLIST_LOOKUP:-"true"}
+ALLOWLIST_MODE=${ALLOWLIST_MODE:-"static"}
 ARTIFACTS_PATH=${ARTIFACTS_PATH:-"/mcbe/data/artifacts"}
 DATA_PATH=${DATA_PATH:-"/mcbe/data"}
 DOWNLOAD_ENDPOINT=${DOWNLOAD_ENDPOINT:-"https://minecraft.azureedge.net/bin-linux"}
@@ -12,16 +16,12 @@ EXEC_NAME="cbwx-mcbe-${SERVER_NAME// /-}-server"
 PERMISSIONS_FILE=${PERMISSIONS_FILE:-"/mcbe/data/permissions.json"}
 PERMISSIONS_LOOKUP=${PERMISSIONS_LOOKUP:-"true"}
 PERMISSIONS_MODE=${PERMISSIONS_MODE:-"static"}
+PLAYERDB_LOOKUP_URL=${PLAYERDB_LOOKUP_URL:-"https://playerdb.co/api/player/xbox"}
 SEEDS_FILE=${SEEDS_FILE:-"/mcbe/seeds.txt"}
 SERVER_PATH=${SERVER_PATH:-"/mcbe/server"}
 SERVER_PROPERTIES=${SERVER_PROPERTIES:-"/mcbe/server/server.properties"}
 VERSION=${VERSION:-"LATEST"}
 VERSIONS_FILE=${VERSIONS_FILE:-"/mcbe/versions.txt"}
-WHITELIST_ENABLE=${WHITELIST_ENABLE:-"false"}
-WHITELIST_FILE=${WHITELIST_FILE:-"/mcbe/data/whitelist.json"}
-WHITELIST_LOOKUP=${WHITELIST_LOOKUP:-"true"}
-WHITELIST_MODE=${WHITELIST_MODE:-"static"}
-XBL_LOOKUP_URL=${XBL_LOOKUP_URL:-"https://api.cubeworx.io/mcbe/lookup"}
 
 check_data_dir() {
   DIR_NAME=$1
@@ -70,11 +70,17 @@ extract_server_zip() {
     echo "Creating symlink ${SERVER_PATH}/permissions.json to ${PERMISSIONS_FILE}"
     ln -s $PERMISSIONS_FILE $SERVER_PATH/permissions.json
   fi
-  #If whitelist.json in server directory exists, delete and create symlink to file in data dir
+  #If allowlist.json in server directory exists, delete and create symlink to file in data dir
+  if [ -f "${SERVER_PATH}/allowlist.json" ] && [ ! -L "${SERVER_PATH}/allowlist.json" ]; then
+    rm -rf $SERVER_PATH/allowlist.json
+    echo "Creating symlink ${SERVER_PATH}/allowlist.json to ${ALLOWLIST_FILE}"
+    ln -s $ALLOWLIST_FILE $SERVER_PATH/allowlist.json
+  fi
+  #If allowlist.json in server directory exists, delete and create symlink to file in data dir
   if [ -f "${SERVER_PATH}/whitelist.json" ] && [ ! -L "${SERVER_PATH}/whitelist.json" ]; then
     rm -rf $SERVER_PATH/whitelist.json
-    echo "Creating symlink ${SERVER_PATH}/whitelist.json to ${WHITELIST_FILE}"
-    ln -s $WHITELIST_FILE $SERVER_PATH/whitelist.json
+    echo "Creating symlink ${SERVER_PATH}/whitelist.json to ${ALLOWLIST_FILE}"
+    ln -s $ALLOWLIST_FILE $SERVER_PATH/whitelist.json
   fi
   compare_version
   echo $VERSION > $DATA_PATH/version.txt
@@ -145,9 +151,9 @@ done
 #Update server.properties
 source $MCBE_HOME/scripts/server-properties.sh
 update_server_properties
-#Check permissions & whitelist
-source $MCBE_HOME/scripts/permissions-whitelist.sh
-check_whitelist
+#Check permissions & allowlist
+source $MCBE_HOME/scripts/permissions-allowlist.sh
+check_allowlist
 check_permissions
 create_cache_files
 #Check addons
@@ -167,8 +173,8 @@ echo "########## PERMISSIONS ##########"
 cat $PERMISSIONS_FILE
 echo "#################################"
 echo ""
-echo "########## WHITELIST ##########"
-cat $WHITELIST_FILE
+echo "########## ALLOWLIST ##########"
+cat $ALLOWLIST_FILE
 echo "#################################"
 cd $SERVER_PATH/
 export LD_LIBRARY_PATH=.

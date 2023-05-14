@@ -1,38 +1,38 @@
-# These functions generate the permissions.json & whitelist.json files
-# Because permissions can update whitelist.json too, need to process whitelist first
+# These functions generate the permissions.json & allowlist.json files
+# Because permissions can update allowlist.json too, need to process allowlist first
 
-check_whitelist() {
-  #Check whitelist mode
-  if [[ "x${WHITELIST_MODE,,}" == "xstatic" ]] || [[ "x${WHITELIST_MODE,,}" == "xdynamic" ]]; then
+check_allowlist() {
+  #Check allowlist mode
+  if [[ "x${ALLOWLIST_MODE,,}" == "xstatic" ]] || [[ "x${ALLOWLIST_MODE,,}" == "xdynamic" ]]; then
     #If static, overwrite file at start
-    if [[ "x${WHITELIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]] ; then
-      echo "[]" > $WHITELIST_FILE
-    elif [[ "x${WHITELIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xtrue" ]] ; then
-      cat $SERVER_PATH/whitelist.json.cached > $WHITELIST_FILE
+    if [[ "x${ALLOWLIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]] ; then
+      echo "[]" > $ALLOWLIST_FILE
+    elif [[ "x${ALLOWLIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xtrue" ]] ; then
+      cat $SERVER_PATH/allowlist.json.cached > $ALLOWLIST_FILE
     #If dynamic, create file in data directory if doesn't exist
-    elif [[ "x${WHITELIST_MODE,,}" == "xdynamic" ]] && [ ! -f "${WHITELIST_FILE}" ]; then
-      echo "[]" > $WHITELIST_FILE
+    elif [[ "x${ALLOWLIST_MODE,,}" == "xdynamic" ]] && [ ! -f "${ALLOWLIST_FILE}" ]; then
+      echo "[]" > $ALLOWLIST_FILE
     fi
   else
-    echo "ERROR: Invalid option for WHITELIST_MODE!"
+    echo "ERROR: Invalid option for ALLOWLIST_MODE!"
     echo "Options are: 'static' or 'dymamic'"
     exit 1
   fi
-  #If whitelist is enabled check usernames
-  #Because whitelist.json is case sensitive prefer to verify gamertag
-  if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-    #If WHITELIST_USERS not empty and not already initialized
-    if [[ "x${WHITELIST_USERS}" != "x" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]]; then
+  #If allowlist is enabled check usernames
+  #Because allowlist.json is case sensitive prefer to verify gamertag
+  if [[ "x${ALLOWLIST_ENABLE,,}" == "xtrue" ]]; then
+    #If ALLOWLIST_USERS not empty and not already initialized
+    if [[ "x${ALLOWLIST_USERS}" != "x" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]]; then
       #If lookup enabled verify from api
-      if [[ "x${WHITELIST_LOOKUP,,}" == "xtrue" ]]; then
-        for USER in $(echo $WHITELIST_USERS | sed "s/,/ /g"); do
-          lookup_xbl_profile gamertag $USER
+      if [[ "x${ALLOWLIST_LOOKUP,,}" == "xtrue" ]]; then
+        for USER in $(echo $ALLOWLIST_USERS | sed "s/,/ /g"); do
+          playerdb_lookup $USER
         done
       #If lookup disabled write values from env vars
-      elif [[ "x${WHITELIST_LOOKUP,,}" == "xfalse" ]]; then
-        jq -n --arg users "${WHITELIST_USERS}" '$users | split(",") | map({"name": .})' > $WHITELIST_FILE
+      elif [[ "x${ALLOWLIST_LOOKUP,,}" == "xfalse" ]]; then
+        jq -n --arg users "${ALLOWLIST_USERS}" '$users | split(",") | map({"name": .})' > $ALLOWLIST_FILE
       else
-        echo "ERROR: Invalid option for WHITELIST_LOOKUP!"
+        echo "ERROR: Invalid option for ALLOWLIST_LOOKUP!"
         echo "Options are: 'true' or 'false'"
         exit 1
       fi
@@ -85,53 +85,45 @@ check_permission_levels() {
   PERMISSIONS_LEVEL_NAME=$1
   PERMISSIONS_LEVEL_STRING=$2
   if [[ "x${PERMISSIONS_LEVEL_STRING}" != "x" ]]; then
-    for STRING in $(echo $PERMISSIONS_LEVEL_STRING | sed "s/,/ /g"); do
-      #Determine if value is xuid or gamertag
-      #TODO: not reliable if gamertag is just numbers
-      if [[ "${STRING}" =~ ^[0-9]+$ ]]; then
-        LOOKUP="xuid"
-      else
-        LOOKUP="gamertag"
-      fi
-      lookup_xbl_profile $LOOKUP $STRING $PERMISSIONS_LEVEL_NAME
+    for PLAYERID in $(echo $PERMISSIONS_LEVEL_STRING | sed "s/,/ /g"); do
+      playerdb_lookup $PLAYERID $PERMISSIONS_LEVEL_NAME
     done
   fi
 }
 
-lookup_xbl_profile() {
-  XBL_LOOKUP=$1
-  XBL_STRING=$2
-  PERMISSIONS_LEVEL_NAME=$3
+playerdb_lookup() {
+  PLAYERID=$1
+  PERMISSIONS_LEVEL_NAME=$2
   #Make call to get xbl profile data
-  XBL_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server:${VERSION}" -H "accept-language:*" $XBL_LOOKUP_URL/$XBL_LOOKUP/$XBL_STRING)
+  PLAYERDB_PROFILE_DATA=$(curl -fsSL -A "cubeworx/mcbe-server:${VERSION}" -H "accept-language:*" $PLAYERDB_LOOKUP_URL/$PLAYERID)
   #If receive proper data update permissions, otherwise fail silently
-  if [[ $(echo $XBL_PROFILE_DATA | grep hostId | grep Gamertag | wc -l) -ne 0 ]]; then
-    XBL_GAMERTAG=$(echo $XBL_PROFILE_DATA | jq -r '.profileUsers[].settings[]|select(.id == "Gamertag").value')
-    XBL_XUID=$(echo $XBL_PROFILE_DATA | jq -r '.profileUsers[].id')
+  if [[ $(echo $PLAYERDB_PROFILE_DATA | grep -i success | grep found | wc -l) -ne 0 ]]; then
+    PLAYER_USERNAME=$(echo $PLAYERDB_PROFILE_DATA | jq -r '.data.player.username')
+    PLAYER_XUID=$(echo $PLAYERDB_PROFILE_DATA | jq -r '.data.player.id')
     if [[ "x${PERMISSIONS_LEVEL_NAME}" != "x" ]]; then
-      update_permissions $XBL_GAMERTAG $XBL_XUID $PERMISSIONS_LEVEL_NAME
+      update_permissions $PLAYER_USERNAME $PLAYER_XUID $PERMISSIONS_LEVEL_NAME
     fi
-    #Update whitelist too
-    if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-      update_whitelist $XBL_GAMERTAG $XBL_XUID $PERMISSIONS_LEVEL_NAME
+    #Update allowlist too
+    if [[ "x${ALLOWLIST_ENABLE,,}" == "xtrue" ]]; then
+      update_allowlist $PLAYER_USERNAME $PLAYER_XUID $PERMISSIONS_LEVEL_NAME
     fi
   fi
 }
 
-update_whitelist() {
-  WHITELIST_NAME=$1
-  WHITELIST_XUID=$2
+update_allowlist() {
+  ALLOWLIST_NAME=$1
+  ALLOWLIST_XUID=$2
   PERMISSIONS_LEVEL_NAME=$3
   #Enable operators to join game even if max players limit reached
   if [[ "x${PERMISSIONS_LEVEL_NAME}" == "xoperator" ]]; then
-    WHITELIST_INFO="{\"name\": \"${WHITELIST_NAME}\", \"xuid\": \"${WHITELIST_XUID}\", \"ignoresPlayerLimit\": true }"
+    ALLOWLIST_INFO="{\"name\": \"${ALLOWLIST_NAME}\", \"xuid\": \"${ALLOWLIST_XUID}\", \"ignoresPlayerLimit\": true }"
   else
-    WHITELIST_INFO="{\"name\": \"${WHITELIST_NAME}\", \"xuid\": \"${WHITELIST_XUID}\" }"
+    ALLOWLIST_INFO="{\"name\": \"${ALLOWLIST_NAME}\", \"xuid\": \"${ALLOWLIST_XUID}\" }"
   fi
-  if [[ $(cat $WHITELIST_FILE | jq --arg XUID "${WHITELIST_XUID}" -r '.[]|select(.xuid == $XUID)' | wc -l) -eq 0 ]]; then
-    echo "Adding ${WHITELIST_NAME} ${WHITELIST_XUID} to ${WHITELIST_FILE}"
-    jq ". |= . + [${WHITELIST_INFO}]" $WHITELIST_FILE > "${WHITELIST_FILE}.tmp"
-    mv "${WHITELIST_FILE}.tmp" $WHITELIST_FILE
+  if [[ $(cat $ALLOWLIST_FILE | jq --arg XUID "${ALLOWLIST_XUID}" -r '.[]|select(.xuid == $XUID)' | wc -l) -eq 0 ]]; then
+    echo "Adding ${ALLOWLIST_NAME} ${ALLOWLIST_XUID} to ${ALLOWLIST_FILE}"
+    jq ". |= . + [${ALLOWLIST_INFO}]" $ALLOWLIST_FILE > "${ALLOWLIST_FILE}.tmp"
+    mv "${ALLOWLIST_FILE}.tmp" $ALLOWLIST_FILE
   fi
 }
 
@@ -148,9 +140,9 @@ update_permissions() {
 }
 
 create_cache_files() {
-  #Create copies of whitelist.json & permissions.json at init if modes are static
-  if [[ "x${WHITELIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]] ; then
-    cp $WHITELIST_FILE $SERVER_PATH/whitelist.json.cached
+  #Create copies of allowlist.json & permissions.json at init if modes are static
+  if [[ "x${ALLOWLIST_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]] ; then
+    cp $ALLOWLIST_FILE $SERVER_PATH/allowlist.json.cached
   fi
   if [[ "x${PERMISSIONS_MODE,,}" == "xstatic" ]] && [[ "x${SERVER_INITIALIZED}" == "xfalse" ]] ; then
     cp $PERMISSIONS_FILE $SERVER_PATH/permissions.json.cached

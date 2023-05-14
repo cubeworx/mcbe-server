@@ -25,13 +25,13 @@ The image runs with default or recommended configurations but can be customized 
 
 |                               |                                                                           |
 |-------------------------------|---------------------------------------------------------------------------|
+| `ALLOWLIST_ENABLE="false"`    | Specify if connected players must be listed in ALLOWLIST_USERS variable   |
+| `ALLOWLIST_LOOKUP="true"`     | Specify if player usernames get verified from online api or written as is |
+| `ALLOWLIST_MODE="static"`     | Specify if allowlist file gets overwritten every time container starts    |
 | `LEVEL_NAME="Bedrock-Level"`  | Default level name of world. Customized to remove space in default name   |
 | `PERMISSIONS_LOOKUP="true"`   | Specify if player xuids get verified from online api or written as is     |
 | `PERMISSIONS_MODE="static"`   | Specify if permissions file gets overwritten every time container starts  |
 | `SERVER_NAME="CubeWorx-MCBE"` | Default server name that shows up under LAN Games in the Friends tab      |
-| `WHITELIST_ENABLE="false"`    | Specify if connected players must be listed in WHITELIST_USERS variable   |
-| `WHITELIST_LOOKUP="true"`     | Specify if player usernames get verified from online api or written as is |
-| `WHITELIST_MODE="static"`     | Specify if whitelist file gets overwritten every time container starts    |
 
 ### Basic Server Properties Environment Variables
 
@@ -100,28 +100,21 @@ docker run -d -it -p 19132:19132/udp -v mcbe-data:/mcbe/data -e EULA=true cubewo
 If your server will not be exposed to the internet and players will only be connecting from tablets, consoles, etc. on the local network then you may want to set `ONLINE_MODE=false` so that players connecting to your server won't have to authticate. This is especially useful if you have younger children playing on tablets that don't have their own Microsoft accounts.
 
 
-## CubeWorx API
+## Allowlist
 
-The CubeWorx API is being developed to help with automatically looking up information such as: versions, gamertags, xuids, etc. This API is currently **exerimental** and not guaranteed. If you experience issues with the API returning the correct information you can:
-
-- Try setting `XBL_LOOKUP_URL=https://xbl-api.prouser123.me/profile/settings`
-- Set `PERMISSIONS_LOOKUP="false"` and `WHITELIST_LOOKUP="false"`
-
-## Whitelist
-
-The whitelist is the list of player usernames that are allowed to connect to your server when `WHITELIST_ENABLE="true"` which should be set if your server is going to be publicly accessible. By default the whitelist file gets overwritten whenever the container starts/restarts to ensure that the usernames match what is in the config.
-Setting `WHITELIST_MODE="dynamic"` will allow whitelist changes made in the game from supported clients to be retained upon start/restart of the container. Since usernames are case-sensitive, they are verified against an xbox live API to make sure there aren't any mistakes. This lookup can be disabled by setting `WHITELIST_LOOKUP="false"`.
-The whitelist file is generated from the names included in the `WHITELIST_USERS`, `OPERATORS`, `MEMBERS`, & `VISITORS`. It is not necessary to enter a username in more than one environment variable. The following example will result in five names being added to the whitelist.
+The allowlist is the list of player usernames that are allowed to connect to your server when `ALLOWLIST_ENABLE="true"` which should be set if your server is going to be publicly accessible. By default the allowlist file gets overwritten whenever the container starts/restarts to ensure that the usernames match what is in the config.
+Setting `ALLOWLIST_MODE="dynamic"` will allow allowlist changes made in the game from supported clients to be retained upon start/restart of the container. Since usernames are case-sensitive, they are verified against an xbox live API to make sure there aren't any mistakes. This lookup can be disabled by setting `ALLOWLIST_LOOKUP="false"`.
+The allowlist file is generated from the names included in the `ALLOWLIST_USERS`, `OPERATORS`, `MEMBERS`, & `VISITORS`. It is not necessary to enter a username in more than one environment variable. The following example will result in five names being added to the allowlist.
 
 ```
--e WHITELIST_USERS=player1,player2,player3 -e OPERATORS=operator1 -e MEMBERS=member1
+-e ALLOWLIST_USERS=player1,player2,player3 -e OPERATORS=operator1 -e MEMBERS=member1
 ```
 
 ## Permissions
 
 Permissions variables can be a list of usernames or XUIDs since the values are verified against an xbox live API when the container first starts. This lookup can be disabled by setting `PERMISSIONS_LOOKUP="false"` but then will require exact XUIDs to be entered for each user.
 By default the permissions file gets overwritten whenever the container starts/restarts to ensure that the username permissions match what is in the config. Setting `PERMISSIONS_MODE="dynamic"` will allow permission changes made in the game from supported clients to be retained upon start/restart of the container.
-If `WHITELIST_ENABLE="true"` then players in the `OPERATORS`, `MEMBERS`, or `VISITORS` will automatically be added to the server whitelist.
+If `ALLOWLIST_ENABLE="true"` then players in the `OPERATORS`, `MEMBERS`, or `VISITORS` will automatically be added to the server allowlist.
 
 ```
 -e OPERATORS=operator1,8675309124 -e MEMBERS=member1,1234567890,member2 -e VISITORS=visitor1

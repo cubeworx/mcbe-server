@@ -9,6 +9,26 @@ update_server_properties() {
       exit 1
     fi
   fi
+  #CHAT_RESTRICTION
+  if [[ "x${CHAT_RESTRICTION}" != "x" ]]; then
+    if [[ "x${CHAT_RESTRICTION}" == "xNone" ]] || [[ "x${CHAT_RESTRICTION}" == "xDropped" ]] || [[ "x${CHAT_RESTRICTION}" == "xDisabled" ]]; then
+      sed -i "s/chat-restriction=.*/chat-restriction=${CHAT_RESTRICTION}/" $SERVER_PROPERTIES
+    else
+      echo "ERROR: Invalid option for CHAT_RESTRICTION!"
+      echo "Options are: 'None', 'Dropped', or 'Disabled'"
+      exit 1
+    fi
+  fi
+  #COMPRESSION_ALGORITHM
+  if [[ "x${COMPRESSION_ALGORITHM}" != "x" ]]; then
+    if [[ "x${COMPRESSION_ALGORITHM,,}" == "xzlib" ]] || [[ "x${COMPRESSION_ALGORITHM,,}" == "xsnappy" ]]; then
+      sed -i "s/compression-algorithm=.*/compression-algorithm=${COMPRESSION_ALGORITHM}/" $SERVER_PROPERTIES
+    else
+      echo "ERROR: Invalid option for COMPRESSION_ALGORITHM!"
+      echo "Options are: 'zlib' or 'snappy'"
+      exit 1
+    fi
+  fi
   #COMPRESSION_THRESHOLD
   if [[ "x${COMPRESSION_THRESHOLD}" != "x" ]]; then
     if [[ "${COMPRESSION_THRESHOLD}" -gt 0 ]] && [[ "${COMPRESSION_THRESHOLD}" -lt 65536 ]]; then
@@ -55,6 +75,16 @@ update_server_properties() {
     else
       echo "ERROR: Invalid option for DIFFICULTY!"
       echo "Options are: 'peaceful', 'easy', 'normal', or 'hard'"
+      exit 1
+    fi
+  fi
+  #DISABLE_PLAYER_INTERACTION
+  if [[ "x${DISABLE_PLAYER_INTERACTION}" != "x" ]]; then
+    if [[ "x${DISABLE_PLAYER_INTERACTION,,}" == "xtrue" ]] || [[ "x${DISABLE_PLAYER_INTERACTION,,}" == "xfalse" ]]; then
+      sed -i "s/disable-player-interaction=.*/disable-player-interaction=${DISABLE_PLAYER_INTERACTION}/" $SERVER_PROPERTIES
+    else
+      echo "ERROR: Invalid option for DISABLE_PLAYER_INTERACTION!"
+      echo "Options are: 'true' or 'false'"
       exit 1
     fi
   fi
@@ -132,8 +162,8 @@ update_server_properties() {
   fi
   #ONLINE_MODE
   if [[ "x${ONLINE_MODE}" != "x" ]]; then
-    if [[ "x${ONLINE_MODE,,}" == "xfalse" ]] && [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-      echo "ERROR: ONLINE_MODE can't be 'false' when WHITELIST_ENABLE is 'true'!"
+    if [[ "x${ONLINE_MODE,,}" == "xfalse" ]] && [[ "x${ALLOWLIST_ENABLE,,}" == "xtrue" ]]; then
+      echo "ERROR: ONLINE_MODE can't be 'false' when ALLOWLIST_ENABLE is 'true'!"
       exit 1
     elif [[ "x${ONLINE_MODE,,}" == "xtrue" ]] || [[ "x${ONLINE_MODE,,}" == "xfalse" ]]; then
       sed -i "s/online-mode=.*/online-mode=${ONLINE_MODE}/" $SERVER_PROPERTIES
@@ -151,6 +181,10 @@ update_server_properties() {
       echo "ERROR: PLAYER_IDLE_TIMEOUT must be a positive number!"
       exit 1
     fi
+  fi
+  #PLAYER_MOVEMENT_ACTION_DIRECTION_THRESHOLD
+  if [[ "x${PLAYER_MOVEMENT_ACTION_DIRECTION_THRESHOLD}" != "x" ]]; then
+    sed -i "s/player-movement-action-direction-threshold=.*/player-movement-action-direction-threshold=${PLAYER_MOVEMENT_ACTION_DIRECTION_THRESHOLD}/" $SERVER_PROPERTIES
   fi
   #PLAYER_MOVEMENT_DISTANCE_THRESHOLD
   if [[ "x${PLAYER_MOVEMENT_DISTANCE_THRESHOLD}" != "x" ]]; then
@@ -186,7 +220,7 @@ update_server_properties() {
   fi
   #SERVER_AUTHORITATIVE_MOVEMENT
   if [[ "x${SERVER_AUTHORITATIVE_MOVEMENT}" != "x" ]]; then
-    if [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "xclient-auth" ]] || [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "xserver-auth" ]] || [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "server-auth-with-rewind" ]]; then
+    if [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "xclient-auth" ]] || [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "xserver-auth" ]] || [[ "x${SERVER_AUTHORITATIVE_MOVEMENT,,}" == "xserver-auth-with-rewind" ]]; then
       sed -i "s/server-authoritative-movement=.*/server-authoritative-movement=${SERVER_AUTHORITATIVE_MOVEMENT}/" $SERVER_PROPERTIES
     else
       echo "ERROR: Invalid option for SERVER_AUTHORITATIVE_MOVEMENT!"
@@ -244,18 +278,19 @@ update_server_properties() {
       exit 1
     fi
   fi
-  #WHITELIST_ENABLE
-  if [[ "x${WHITELIST_ENABLE}" != "x" ]]; then
-    if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]] || [[ "x${WHITELIST_ENABLE,,}" == "xfalse" ]]; then
-      if [[ "x${WHITELIST_ENABLE,,}" == "xtrue" ]]; then
-        if [[ "x${WHITELIST_USERS}" == "x" ]] && [[ "x${OPERATORS}" == "x" ]] && [[ "x${MEMBERS}" == "x" ]] && [[ "x${VISITORS}" == "x" ]]; then
-          echo "ERROR: If WHITELIST_ENABLE is true then either WHITELIST_USERS, OPERATORS, MEMBERS, or VISITORS must not be empty!"
+  #ALLOWLIST_ENABLE
+  if [[ "x${ALLOWLIST_ENABLE}" != "x" ]]; then
+    if [[ "x${ALLOWLIST_ENABLE,,}" == "xtrue" ]] || [[ "x${ALLOWLIST_ENABLE,,}" == "xfalse" ]]; then
+      if [[ "x${ALLOWLIST_ENABLE,,}" == "xtrue" ]]; then
+        if [[ "x${ALLOWLIST_USERS}" == "x" ]] && [[ "x${OPERATORS}" == "x" ]] && [[ "x${MEMBERS}" == "x" ]] && [[ "x${VISITORS}" == "x" ]]; then
+          echo "ERROR: If ALLOWLIST_ENABLE is true then either ALLOWLIST_USERS, OPERATORS, MEMBERS, or VISITORS must not be empty!"
           exit 1
         fi
-        sed -i "s/white-list=.*/white-list=${WHITELIST_ENABLE}/" $SERVER_PROPERTIES
+        sed -i "s/allow-list=.*/allow-list=${ALLOWLIST_ENABLE}/" $SERVER_PROPERTIES
+        sed -i "s/white-list=.*/white-list=${ALLOWLIST_ENABLE}/" $SERVER_PROPERTIES
       fi
     else
-      echo "ERROR: Invalid option for WHITELIST_ENABLE!"
+      echo "ERROR: Invalid option for ALLOWLIST_ENABLE!"
       echo "Options are: 'true' or 'false'"
       exit 1
     fi
