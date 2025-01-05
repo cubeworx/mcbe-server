@@ -59,11 +59,27 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: cubeworx/mcbe-server:${{ env.IMG_VER }},cubeworx/mcbe-server:latest
 
-      - uses: ethomson/send-tweet-action@v1.0.0
+      - name: Tweet Release
+        uses: nearform-actions/github-action-notify-twitter@master
         if: github.event_name != 'pull_request'
         with:
-          status: "New version of CubeWorx Minecraft Bedrock Edition Server Image released: https://hub.docker.com/r/cubeworx/mcbe-server/tags?page=1&ordering=last_updated&name=${{ env.IMG_VER }}"
-          consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
-          consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
-          access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          message: "New version of CubeWorx Minecraft Bedrock Edition Server Image released: https://hub.docker.com/r/cubeworx/mcbe-server/tags?page=1&ordering=last_updated&name=${{ env.IMG_VER }}"
+          twitter-app-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          twitter-app-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          twitter-access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          twitter-access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+
+      - name: Create Tag
+        uses: mathieudutour/github-tag-action@v6.0
+        if:  github.event_name != 'pull_request'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ env.IMG_VER }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if:  github.event_name != 'pull_request'
+        with:
+          name: v${{ env.IMG_VER }}
+          generate_release_notes: true
+          tag_name: v${{ env.IMG_VER }}
