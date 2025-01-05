@@ -77,7 +77,7 @@ extract_server_zip() {
     echo "Creating symlink ${SERVER_PATH}/allowlist.json to ${ALLOWLIST_FILE}"
     ln -s "${ALLOWLIST_FILE}" "${SERVER_PATH}/allowlist.json"
   fi
-  #If allowlist.json in server directory exists, delete and create symlink to file in data dir
+  #If whitelist.json in server directory exists, delete and create symlink to file in data dir
   if [ -f "${SERVER_PATH}/whitelist.json" ] && [ ! -L "${SERVER_PATH}/whitelist.json" ]; then
     rm -rf "${SERVER_PATH}/whitelist.json"
     echo "Creating symlink ${SERVER_PATH}/whitelist.json to ${ALLOWLIST_FILE}"
@@ -93,7 +93,7 @@ extract_server_zip() {
 compare_version() {
   if [ -f "${DATA_PATH}/version.txt" ]; then
     OLD_VER=$(cat "${DATA_PATH}/version.txt")
-    if [[ "x${OLD_VER}" != "x${VERSION}" ]]; then
+    if [[ "${OLD_VER}" != "${VERSION}" ]]; then
       DATE_TIME=$(date +%Y%m%d%H%M%S)
       echo "Previous version was ${OLD_VER}, current version is ${VERSION}"
       echo "Creating backup of data before version change."
@@ -112,7 +112,7 @@ check_symlinks() {
 }
 
 #Check EULA
-if [[ "x${EULA^^}" != "xTRUE" ]]; then
+if [[ "${EULA^^}" != "TRUE" ]]; then
   echo "ERROR: EULA variable must be TRUE!"
   echo "See https://minecraft.net/terms"
   exit 1
